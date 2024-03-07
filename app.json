@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "mindmasterminds",
     "name": "MindMasterMinds-App",
     "slug": "MindMasterMinds-App",
     "version": "1.0.0",

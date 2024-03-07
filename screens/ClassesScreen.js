@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, StatusBar, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, Image, StyleSheet, StatusBar, SafeAreaView, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { AuthConText } from '../store/auth-context';
 import { axiosAuth } from '../lib/axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +7,7 @@ import SkeletonLoader from '../components/UI/SkeletonLoading';
 import { FontAwesome5 } from '@expo/vector-icons';
 import moment from 'moment-timezone';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
+import { GlobalStyles } from '../constants/style';
 
 export default function ClassesScreen() {
     const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -17,7 +18,7 @@ export default function ClassesScreen() {
     const [role, setRole] = useState('');
     const [userID, setUserID] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,67 +68,70 @@ export default function ClassesScreen() {
 
     const renderItem = ({ item }) => {
         return (
-            <View style={{ backgroundColor: '#f3f5f9' }}>
-                <View contentContainerStyle={styles.container}>
-                    <TouchableOpacity
-                        key={item.id}
-                        onPress={() => {
-                            // handle onPress
-                        }}>
-                        <View style={styles.card}>
+            <>
+                {isLoading && <LoadingOverlay />}
+                <View style={{ backgroundColor: '#f3f5f9' }}>
+                    <View contentContainerStyle={styles.container}>
+                        <TouchableOpacity
+                            key={item.id}
+                            onPress={() => {
+                                // handle onPress
+                            }}>
+                            <View style={styles.card}>
 
-                            <View style={styles.cardBody}>
-                                <Text>
-                                    <Text style={styles.cardTitle}>{item.courseSubject.subject.code} - </Text>{' '}
-                                    <Text style={styles.cardName}>
-                                        {item.courseSubject.subject.name}
-                                    </Text>
-                                </Text>
-                                <View style={styles.cardRow}>
-                                    <View style={styles.cardRowItem}>
-                                        <FontAwesome5 name="calendar-alt" size={24} color="gray" />
-                                        <Text style={styles.cardRowItemText}>
-                                            {
-                                                moment.utc(item.study).tz('Asia/Ho_Chi_Minh').format('DD-MM-YYYY')
-                                            }
-                                        </Text>
-                                    </View>
-
-                                    <View style={styles.cardRowItem}>
-                                        <FontAwesome5 name="clock" size={24} color="gray" />
-                                        <Text style={styles.cardRowItemText}>
-                                            {
-                                                item.quantity
-                                            } session
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                <View style={styles.buttonGroup}>
-                                    <Text style={styles.cardPrice}>
-                                        <Text style={styles.cardPriceCurrency}>Status: </Text>
-                                        <Text style={styles.cardPriceValue}>
-                                            {
-                                                item.statusOrder === "Confirmed"
-                                                    ? "On Progress"
-                                                    : item.statusOrder
-                                            }
+                                <View style={styles.cardBody}>
+                                    <Text>
+                                        <Text style={styles.cardTitle}>{item.courseSubject.subject.code} - </Text>{' '}
+                                        <Text style={styles.cardName}>
+                                            {item.courseSubject.subject.name}
                                         </Text>
                                     </Text>
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            // handle onPress
-                                        }}>
-                                        <View style={styles.btn}>
-                                            <Text style={styles.btnText}>Go to course</Text>
+                                    <View style={styles.cardRow}>
+                                        <View style={styles.cardRowItem}>
+                                            <FontAwesome5 name="calendar-alt" size={24} color="gray" />
+                                            <Text style={styles.cardRowItemText}>
+                                                {
+                                                    moment.utc(item.study).tz('Asia/Ho_Chi_Minh').format('DD-MM-YYYY')
+                                                }
+                                            </Text>
                                         </View>
-                                    </TouchableOpacity>
+
+                                        <View style={styles.cardRowItem}>
+                                            <FontAwesome5 name="clock" size={24} color="gray" />
+                                            <Text style={styles.cardRowItemText}>
+                                                {
+                                                    item.quantity
+                                                } session
+                                            </Text>
+                                        </View>
+                                    </View>
+
+                                    <View style={styles.buttonGroup}>
+                                        <Text style={styles.cardPrice}>
+                                            <Text style={styles.cardPriceCurrency}>Status: </Text>
+                                            <Text style={styles.cardPriceValue}>
+                                                {
+                                                    item.statusOrder === "Confirmed"
+                                                        ? "On Progress"
+                                                        : item.statusOrder
+                                                }
+                                            </Text>
+                                        </Text>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                // handle onPress
+                                            }}>
+                                            <View style={styles.btn}>
+                                                <Text style={styles.btnText}>Go to course</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
+            </>
         );
     };
 
@@ -140,7 +144,12 @@ export default function ClassesScreen() {
     const loadMoreItem = () => {
         setCurrentPage(currentPage + 1);
     };
-
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
+    }, []);
 
 
     return (
@@ -148,6 +157,14 @@ export default function ClassesScreen() {
             <StatusBar backgroundColor="#000" />
             {/* {isLoading && <LoadingOverlay message='' />} */}
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        tintColor={GlobalStyles.colors.backgroundColorPrimary100}
+                        refreshing={refreshing}
+                        onRefresh={() => {
+                            console.log('reset');
+                        }}
+                    />}
                 data={listClasses}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}

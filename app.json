@@ -4,7 +4,7 @@
     "slug": "MindMasterMinds-App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/logo-app.jpg",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/iphone-splash-preview.png",

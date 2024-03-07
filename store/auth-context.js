@@ -19,6 +19,7 @@ export default function AuthConTextProvider({ children }) {
     }
 
     const logout = () => {
+        AsyncStorage.removeItem('token')
         setAuthToken(null)
     }
     const value = {

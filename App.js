@@ -15,9 +15,6 @@ import LoginScreen from './screens/LoginScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import EditProfileScreen from './screens/EditProfileScreen';
-import PricingScreen from './screens/PricingScreen';
-import HistoryOrderScreen from './screens/HistoryOrderScreen';
 const Stack = createNativeStackNavigator()
 const Bottoms = createBottomTabNavigator()
 
@@ -32,7 +29,20 @@ const AuthStack = () => {
       <Stack.Screen
         options={{ headerShown: false }}
         name="Login" component={LoginScreen} />
-      <Stack.Screen name="Signup" component={SignUpScreen} />
+      <Stack.Screen
+        options={{
+          headerShown: false
+        }}
+        name="Signup"
+        component={SignUpScreen}
+      />
+      <Stack.Screen
+        name='OTP'
+        options={{
+          headerShown: false
+        }}
+        component={OTPScreen}
+      />
     </Stack.Navigator>
   );
 }
@@ -53,7 +63,9 @@ const BottomTabs = () => {
               name='exit'
               color={GlobalStyles.colors.backgroundColorPrimary200}
               size={30}
-              onPress={authCtx.logout}
+              onPress={() => {
+                authCtx.logout()
+              }}
             />
           ),
           headerTitleStyle: {
@@ -181,7 +193,6 @@ const Root = () => {
     async function prepare() {
       const fetchToken = async () => {
         const storedToken = await AsyncStorage.getItem('token')
-        console.log('stored token: ', storedToken);
         if (storedToken) {
           authCtx.authenticate(storedToken)
         }

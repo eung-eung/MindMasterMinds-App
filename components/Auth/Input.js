@@ -35,6 +35,7 @@ export default Input;
 const styles = StyleSheet.create({
     inputContainer: {
         marginVertical: 8,
+
     },
     label: {
         color: 'black',
@@ -51,7 +52,8 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         fontSize: 16,
         borderColor: '#ccc',
-        borderWidth: 1
+        borderWidth: 1,
+
     },
     inputInvalid: {
         backgroundColor: GlobalStyles.colors.error100,

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-
 import Button from '../UI/Button';
 import Input from './Input';
 
@@ -8,11 +7,14 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
     const [enteredEmail, setEnteredEmail] = useState('');
     const [enteredPassword, setEnteredPassword] = useState('');
     const [enteredConfirmPassword, setEnteredConfirmPassword] = useState('');
-
+    const [enteredFirstName, setEnteredFirstName] = useState('');
+    const [enteredLastName, setEnteredLastName] = useState('');
     const {
         email: emailIsInvalid,
         password: passwordIsInvalid,
         confirmPassword: passwordsDontMatch,
+        firstName: firstNameIsInvalid,
+        lastName: lastNameIsInvalid,
     } = credentialsInvalid;
 
     function updateInputValueHandler(inputType, enteredValue) {
@@ -26,6 +28,12 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
             case 'confirmPassword':
                 setEnteredConfirmPassword(enteredValue);
                 break;
+            case 'firstName':
+                setEnteredFirstName(enteredValue)
+                break;
+            case 'lastName':
+                setEnteredLastName(enteredValue)
+                break;
         }
     }
 
@@ -34,12 +42,38 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
             email: enteredEmail,
             password: enteredPassword,
             confirmPassword: enteredConfirmPassword,
+            lastName: enteredLastName,
+            firstName: enteredFirstName
         });
     }
 
     return (
         <View style={styles.form}>
             <View>
+                {!isLogin && (
+                    <Input
+                        label="First Name"
+                        onUpdateValue={updateInputValueHandler.bind(
+                            this,
+                            'firstName'
+                        )}
+                        value={enteredFirstName}
+                        isInvalid={firstNameIsInvalid}
+                        placeholder='FirstName'
+                    />
+                )}
+                {!isLogin && (
+                    <Input
+                        label="Last Name"
+                        onUpdateValue={updateInputValueHandler.bind(
+                            this,
+                            'lastName'
+                        )}
+                        placeholder='LastName'
+                        value={enteredLastName}
+                        isInvalid={lastNameIsInvalid}
+                    />
+                )}
                 <Input
                     label="Email Address"
                     onUpdateValue={updateInputValueHandler.bind(this, 'email')}
@@ -68,6 +102,7 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
                         isInvalid={passwordsDontMatch}
                     />
                 )}
+
                 <View style={styles.buttons}>
                     <Button onPress={submitHandler}>
                         {isLogin ? 'Log In' : 'Sign Up'}
@@ -82,6 +117,6 @@ export default AuthForm;
 
 const styles = StyleSheet.create({
     buttons: {
-        marginTop: 12,
+        marginTop: 20,
     },
 });

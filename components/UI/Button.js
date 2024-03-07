@@ -2,10 +2,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { GlobalStyles } from '../../constants/style';
 
-function Button({ children, onPress }) {
+function Button({ disabled, children, onPress }) {
     return (
         <Pressable
-            style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+            disabled={disabled}
+            style={
+                ({ pressed }) => [styles.button, pressed && styles.pressed, (disabled && styles.disabled)]
+
+            }
             onPress={onPress}
         >
             <View>
@@ -18,6 +22,9 @@ function Button({ children, onPress }) {
 export default Button;
 
 const styles = StyleSheet.create({
+    disabled: {
+        backgroundColor: '#ccc'
+    },
     button: {
         borderRadius: 6,
         paddingVertical: 6,
@@ -36,6 +43,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'black',
         fontSize: 16,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        padding: 8
     },
 });

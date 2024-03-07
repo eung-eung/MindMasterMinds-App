@@ -9,7 +9,9 @@ export default function AuthContent({ isLogin, onAuthenticate }) {
     const [credentialsInvalid, setCredentialsInvalid] = useState({
         email: false,
         password: false,
-        confirmPassword: false
+        confirmPassword: false,
+        lastName: false,
+        firstName: false
     })
 
     const switchAuthModeHandler = () => {
@@ -20,29 +22,38 @@ export default function AuthContent({ isLogin, onAuthenticate }) {
         }
     }
     const submitHandler = (credentials) => {
-        let { email, password, confirmPassword } = credentials;
+        let { email, password, confirmPassword, firstName, lastName } = credentials;
 
         email = email.trim();
         password = password.trim();
+        firstName = firstName.trim();
+        lastName = lastName.trim();
 
         const emailIsValid = email.includes('@');
         const passwordIsValid = password.length > 8;
         const passwordsAreEqual = password === confirmPassword;
-
+        const firstNameIsValid = firstName.length > 0
+        const lastNameIsValid = lastName.length > 0
         if (
             !emailIsValid ||
             !passwordIsValid ||
-            (!isLogin && !passwordsAreEqual)
+            (!isLogin && (!passwordsAreEqual || !firstNameIsValid || !lastNameIsValid))
         ) {
             Alert.alert('Invalid input', 'Please check your entered value.');
             setCredentialsInvalid({
                 email: !emailIsValid,
                 password: !passwordIsValid,
                 confirmPassword: !passwordIsValid || !passwordsAreEqual,
+                firstName: !firstNameIsValid,
+                lastName: !lastNameIsValid
             });
             return;
         }
-        onAuthenticate({ email, password });
+        if (isLogin) {
+            onAuthenticate({ email, password });
+        } else {
+            onAuthenticate({ email, password, lastName, firstName })
+        }
     }
     return (
         <View style={styles.authContent}>
@@ -53,7 +64,7 @@ export default function AuthContent({ isLogin, onAuthenticate }) {
             />
             <View style={styles.buttons}>
                 <FlatButton onPress={switchAuthModeHandler}>
-                    {isLogin ? 'Dont have an account? Get started for free' : 'Log in instead'}
+                    {isLogin ? 'Dont have an account? Get started for free' : 'Already have an account? Sign in here'}
                 </FlatButton>
             </View>
         </View>
@@ -62,12 +73,12 @@ export default function AuthContent({ isLogin, onAuthenticate }) {
 
 const styles = StyleSheet.create({
     authContent: {
-        marginHorizontal: 32,
+        marginHorizontal: 20,
         padding: 16,
         borderRadius: 8,
         flex: 1
     },
     buttons: {
-        marginTop: 8,
+        marginTop: 30,
     },
 });

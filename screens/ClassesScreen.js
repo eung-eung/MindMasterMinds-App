@@ -40,13 +40,15 @@ export default function ClassesScreen() {
 
                     const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=${page}&pageSize=5`);
                     console.log(response.data.data);
-                    setListClasses(response.data.data);
+                    if (response.data.data.length === 0) {
+                        setIsLoadingMore(false)
+                    } else {
+                        setIsLoadingMore(true)
+                    }
+                    setListClasses(prev => ([...prev, ...response.data.data]));
 
                 } else if (role === 'Student') {
-                    console.log('vào student');
-
                     const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-me?pageNumber=${page}&pageSize=5`);
-                    console.log(response.data.data);
                     if (response.data.data.length === 0) {
                         setIsLoadingMore(false)
                     } else {

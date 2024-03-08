@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, StatusBar, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, Image, StyleSheet, StatusBar, SafeAreaView, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from "react-native";
 import { AuthConText } from '../store/auth-context';
 import { axiosAuth } from '../lib/axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,13 +7,17 @@ import SkeletonLoader from '../components/UI/SkeletonLoading';
 import { FontAwesome5 } from '@expo/vector-icons';
 import moment from 'moment-timezone';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
+import { GlobalStyles } from '../constants/style';
+import useAxiosAuth from '../lib/hooks/useAxiosAuth';
 
-export default function ClassesScreen({navigation}) {
+export default function ClassesScreen() {
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
     const [isLoading, setIsLoading] = useState(false)
     const [listClasses, setListClasses] = useState([])
     const [role, setRole] = useState('');
+    const [userID, setUserID] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
 
@@ -21,12 +25,13 @@ export default function ClassesScreen({navigation}) {
         const fetchData = async () => {
             try {
                 // Fetch user ID
-                const userID = await AsyncStorage.getItem('userID');
+                const storedUserID = await AsyncStorage.getItem('userID');
+                setUserID(storedUserID);
 
                 // Fetch user data
-                if (userID) {
+                if (storedUserID) {
                     const response = await axiosAuth.get(
-                        `/User/get-user-detail/${userID}`
+                        `/User/get-user-detail/${storedUserID}`
                     );
                     const userData = response.data;
                     setRole(userData.userRole.roleName);
@@ -34,34 +39,32 @@ export default function ClassesScreen({navigation}) {
 
                 // Fetch classes based on role
                 if (role === 'Tutor') {
-                    setIsLoading(true);
-                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=0&pageSize=200`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
-                    });
+
+                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=${page}&pageSize=5`);
+                    console.log(response.data.data);
                     setListClasses(response.data.data);
-                    setIsLoading(false);
+
                 } else if (role === 'Student') {
-                    setIsLoading(true);
-                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-me?pageNumber=0&pageSize=200`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
-                    });
-                    setListClasses(response.data.data);
-                    setIsLoading(false);
+                    console.log('vào student');
+
+                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-me?pageNumber=${page}&pageSize=5`);
+                    console.log(response.data.data);
+                    if (response.data.data.length === 0) {
+                        setIsLoadingMore(false)
+                    } else {
+                        setIsLoadingMore(true)
+                    }
+                    setListClasses(prev => ([...prev, ...response.data.data]));
+
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setIsLoading(false);
             }
-        };
+            // Fetch classes based on role
 
-        fetchData();
-    }, [role, currentPage]);
+        } catch (error) {
+            console.error('Error fetching data:', error);
 
-
+        }
+    };
     const renderItem = ({ item }) => {
         return (
             <View style={{ backgroundColor: '#f3f5f9' }}>
@@ -69,36 +72,36 @@ export default function ClassesScreen({navigation}) {
                     <TouchableOpacity
                         key={item.id}
                         onPress={() => {
-                            navigation.navigate('DetailClass', { classID: item.id, role: role });
+                            // handle onPress
                         }}>
                         <View style={styles.card}>
 
-                            <View style={styles.cardBody}>
-                                <Text>
-                                    <Text style={styles.cardTitle}>{item.courseSubject.subject.code} - </Text>{' '}
-                                    <Text style={styles.cardName}>
-                                        {item.courseSubject.subject.name}
+                                <View style={styles.cardBody}>
+                                    <Text>
+                                        <Text style={styles.cardTitle}>{item.courseSubject.subject.code} - </Text>{' '}
+                                        <Text style={styles.cardName}>
+                                            {item.courseSubject.subject.name}
+                                        </Text>
                                     </Text>
-                                </Text>
-                                <View style={styles.cardRow}>
-                                    <View style={styles.cardRowItem}>
-                                        <FontAwesome5 name="calendar-alt" size={24} color="gray" />
-                                        <Text style={styles.cardRowItemText}>
-                                            {
-                                                moment.utc(item.study).tz('Asia/Ho_Chi_Minh').format('DD-MM-YYYY')
-                                            }
-                                        </Text>
-                                    </View>
+                                    <View style={styles.cardRow}>
+                                        <View style={styles.cardRowItem}>
+                                            <FontAwesome5 name="calendar-alt" size={24} color="gray" />
+                                            <Text style={styles.cardRowItemText}>
+                                                {
+                                                    moment.utc(item.study).tz('Asia/Ho_Chi_Minh').format('DD-MM-YYYY')
+                                                }
+                                            </Text>
+                                        </View>
 
-                                    <View style={styles.cardRowItem}>
-                                        <FontAwesome5 name="clock" size={24} color="gray" />
-                                        <Text style={styles.cardRowItemText}>
-                                            {
-                                                item.quantity
-                                            } session
-                                        </Text>
+                                        <View style={styles.cardRowItem}>
+                                            <FontAwesome5 name="clock" size={24} color="gray" />
+                                            <Text style={styles.cardRowItemText}>
+                                                {
+                                                    item.quantity
+                                                } session
+                                            </Text>
+                                        </View>
                                     </View>
-                                </View>
 
                                 <View style={styles.buttonGroup}>
                                     <Text style={styles.cardPrice}>
@@ -113,7 +116,7 @@ export default function ClassesScreen({navigation}) {
                                     </Text>
                                     <TouchableOpacity
                                         onPress={() => {
-                                            navigation.navigate('DetailClass', { classID: item.id, role: role });
+                                            // handle onPress
                                         }}>
                                         <View style={styles.btn}>
                                             <Text style={styles.btnText}>Go to course</Text>
@@ -130,21 +133,33 @@ export default function ClassesScreen({navigation}) {
 
 
     const renderLoader = () => {
-        return listClasses.length === 0 ? <SkeletonLoader /> : null;
+        console.log('render loadder: ', isLoadingMore);
+        return isLoadingMore ? <ActivityIndicator /> : null;
     };
 
 
-    const loadMoreItem = () => {
-        setCurrentPage(currentPage + 1);
+    const loadMoreItem = async () => {
+        await fetchData(currentPage + 1)
+        setCurrentPage(prev => prev + 1);
     };
 
-
+    const refreshHandler = () => {
+        setListClasses([])
+        setCurrentPage(0)
+        fetchData(0)
+    }
 
     return (
         <>
             <StatusBar backgroundColor="#000" />
-            {/* {isLoading && <LoadingOverlay message='' />} */}
+            {isLoading && <LoadingOverlay />}
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        tintColor={GlobalStyles.colors.backgroundColorPrimary100}
+                        refreshing={refreshing}
+                        onRefresh={refreshHandler}
+                    />}
                 data={listClasses}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}

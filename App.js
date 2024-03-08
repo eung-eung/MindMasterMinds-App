@@ -15,11 +15,6 @@ import LoginScreen from './screens/LoginScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DetailClassScreen from './screens/DetailClassScreen';
-import EditProfileScreen from './screens/EditProfileScreen';
-import PricingScreen from './screens/PricingScreen';
-import HistoryOrderScreen from './screens/HistoryOrderScreen';
-import OTPScreen from './screens/OTPScreen'
 const Stack = createNativeStackNavigator()
 const Bottoms = createBottomTabNavigator()
 
@@ -130,8 +125,8 @@ const BottomTabs = () => {
           tabBarIcon: ({ size, color }) => <AntDesign name="user" size={size} color={color} />
         }}
       />
-      
-       {/* <Bottoms.Screen
+
+      {/* <Bottoms.Screen
         name='Profile'
         component={EditProfileScreen}
         options={{
@@ -160,9 +155,9 @@ const AuthenticatedStack = () => {
           presentation: 'modal'
         }}
       />
-     <Stack.Screen
+      <Stack.Screen
         name='Pricing'
-        component={PricingScreen}
+        component={Pricing}
         options={{
           title: 'Pricing',
         }}

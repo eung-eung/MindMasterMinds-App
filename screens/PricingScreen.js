@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,8 +6,11 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Linking
 } from 'react-native';
 import { axiosAuth } from '../lib/axios';
+import useAxiosAuth from '../lib/hooks/useAxiosAuth';
+
 
 const packageItem = [
   { id: 1, name: 'Fistful of Gems', price: 25000, value: 200, image: "https://i.pinimg.com/564x/a4/d4/57/a4d457d3dff578f6468e1f19ed7b5afd.jpg" },
@@ -20,9 +23,16 @@ const packageItem = [
 
 export default function PricingScreen({ navigation }) {
   const [selectedItem, setSelectedItem] = useState(null);
-
+  const [deeplink, setDeeplink] = useState(null)
+  const axiosAuth = useAxiosAuth()
   const handlePayment = async (value) => {
-    alert('You choose this')
+    const response = await axiosAuth.post('/TransactionWallet/deposit/vnpay', {
+      'amount': value,
+      'redirectUrl': 'exp://192.168.1.4:8081/MyAccount'
+
+    })
+    const link = await Linking.openURL(response.data.paymentUrl)
+
   };
 
   return (
@@ -33,7 +43,7 @@ export default function PricingScreen({ navigation }) {
         {packageItem.map((item) => (
           <TouchableOpacity
             key={item.id}
-            onPress={() => {
+            onPress={async () => {
               setSelectedItem(item);
               handlePayment(item.price)
             }}

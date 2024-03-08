@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, StatusBar, SafeAreaView, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import { View, Text, FlatList, Image, StyleSheet, StatusBar, SafeAreaView, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from "react-native";
 import { AuthConText } from '../store/auth-context';
 import { axiosAuth } from '../lib/axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,68 +8,64 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import moment from 'moment-timezone';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
 import { GlobalStyles } from '../constants/style';
+import useAxiosAuth from '../lib/hooks/useAxiosAuth';
 
 export default function ClassesScreen() {
-    const [isAuthenticating, setIsAuthenticating] = useState(false);
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
     const [isLoading, setIsLoading] = useState(false)
     const [listClasses, setListClasses] = useState([])
-    const [role, setRole] = useState('');
-    const [userID, setUserID] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [refreshing, setRefreshing] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(true);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [refreshing, setRefreshing] = useState(false)
+    const axiosAuth = useAxiosAuth()
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch user ID
-                const storedUserID = await AsyncStorage.getItem('userID');
-                setUserID(storedUserID);
+        fetchData(0)
+    }, [refreshing])
 
-                // Fetch user data
-                if (storedUserID) {
-                    const response = await axiosAuth.get(
-                        `/User/get-user-detail/${storedUserID}`
-                    );
-                    const userData = response.data;
-                    setRole(userData.userRole.roleName);
-                }
-
-                // Fetch classes based on role
+    const fetchData = async (page = 0) => {
+        console.log('zo');
+        try {
+            const storedUserID = await AsyncStorage.getItem('userID');
+            console.log(storedUserID);
+            if (storedUserID) {
+                const response = await axiosAuth.get(
+                    `/User/get-user-detail/${storedUserID}`
+                );
+                const userData = response.data;
+                console.log('userdata: ', userData.userRole.roleName);
+                const role = userData.userRole.roleName
                 if (role === 'Tutor') {
-                    setIsLoading(true);
-                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=0&pageSize=200`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
-                    });
+
+                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=${page}&pageSize=5`);
+                    console.log(response.data.data);
                     setListClasses(response.data.data);
-                    setIsLoading(false);
+
                 } else if (role === 'Student') {
-                    setIsLoading(true);
-                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-me?pageNumber=0&pageSize=200`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
-                    });
-                    setListClasses(response.data.data);
-                    setIsLoading(false);
+                    console.log('vào student');
+
+                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-me?pageNumber=${page}&pageSize=5`);
+                    console.log(response.data.data);
+                    if (response.data.data.length === 0) {
+                        setIsLoadingMore(false)
+                    } else {
+                        setIsLoadingMore(true)
+                    }
+                    setListClasses(prev => ([...prev, ...response.data.data]));
+
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setIsLoading(false);
             }
-        };
+            // Fetch classes based on role
 
-        fetchData();
-    }, [role, currentPage]);
+        } catch (error) {
+            console.error('Error fetching data:', error);
 
-
+        }
+    };
     const renderItem = ({ item }) => {
         return (
             <>
-                {isLoading && <LoadingOverlay />}
                 <View style={{ backgroundColor: '#f3f5f9' }}>
                     <View contentContainerStyle={styles.container}>
                         <TouchableOpacity
@@ -137,33 +133,32 @@ export default function ClassesScreen() {
 
 
     const renderLoader = () => {
-        return listClasses.length === 0 ? <SkeletonLoader /> : null;
+        console.log('render loadder: ', isLoadingMore);
+        return isLoadingMore ? <ActivityIndicator /> : null;
     };
 
 
-    const loadMoreItem = () => {
-        setCurrentPage(currentPage + 1);
+    const loadMoreItem = async () => {
+        await fetchData(currentPage + 1)
+        setCurrentPage(prev => prev + 1);
     };
-    const onRefresh = React.useCallback(() => {
-        setRefreshing(true);
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 2000);
-    }, []);
 
+    const refreshHandler = () => {
+        setListClasses([])
+        setCurrentPage(0)
+        fetchData(0)
+    }
 
     return (
         <>
             <StatusBar backgroundColor="#000" />
-            {/* {isLoading && <LoadingOverlay message='' />} */}
+            {isLoading && <LoadingOverlay />}
             <FlatList
                 refreshControl={
                     <RefreshControl
                         tintColor={GlobalStyles.colors.backgroundColorPrimary100}
                         refreshing={refreshing}
-                        onRefresh={() => {
-                            console.log('reset');
-                        }}
+                        onRefresh={refreshHandler}
                     />}
                 data={listClasses}
                 renderItem={renderItem}

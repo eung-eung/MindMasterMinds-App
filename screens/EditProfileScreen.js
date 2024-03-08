@@ -193,9 +193,6 @@ export default function EditProfileScreen({ navigation, route }) {
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.buttonText}>History Order</Text>
-          </TouchableOpacity>
         </View>
         <View style={styles.containerSnackbar}>
           <Snackbar

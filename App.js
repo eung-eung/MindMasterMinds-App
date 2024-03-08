@@ -15,6 +15,11 @@ import LoginScreen from './screens/LoginScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DetailClassScreen from './screens/DetailClassScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
+import PricingScreen from './screens/PricingScreen';
+import HistoryOrderScreen from './screens/HistoryOrderScreen';
+import OTPScreen from './screens/OTPScreen'
 const Stack = createNativeStackNavigator()
 const Bottoms = createBottomTabNavigator()
 
@@ -167,6 +172,14 @@ const AuthenticatedStack = () => {
         component={HistoryOrderScreen}
         options={{
           title: 'History Order',
+          presentation: 'modal'
+        }}
+      />
+      <Stack.Screen
+        name='DetailClass'
+        component={DetailClassScreen}
+        options={{
+          title: 'Class',
           presentation: 'modal'
         }}
       />

@@ -18,7 +18,7 @@ const packageItem = [
   { id: 6, name: 'Wagon of Gems', price: 2499000, value: 25000, image: "https://i.pinimg.com/236x/85/03/d3/8503d3104aaacd1e5f6162ac377951be.jpg" },
 ];
 
-export default function Pricing({ navigation }) {
+export default function PricingScreen({ navigation }) {
   const [selectedItem, setSelectedItem] = useState(null);
 
   const handlePayment = async (value) => {

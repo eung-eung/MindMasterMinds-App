@@ -43,10 +43,7 @@ export default function HistoryOrderScreen() {
     }, []);
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity
-            onPress={() => {
-                // handle onPress
-            }}>
+        <View>
             <View style={styles.card}>
                 <View style={styles.cardBody}>
                     <Text style={styles.cardTitle}>{item.courseSubject.subject.name}</Text>
@@ -90,7 +87,7 @@ export default function HistoryOrderScreen() {
                     </View>
                 </View>
             </View>
-        </TouchableOpacity>
+        </View>
     );
 
     return (

@@ -8,14 +8,12 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import moment from 'moment-timezone';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
 
-export default function ClassesScreen() {
-    const [isAuthenticating, setIsAuthenticating] = useState(false);
+export default function ClassesScreen({navigation}) {
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
     const [isLoading, setIsLoading] = useState(false)
     const [listClasses, setListClasses] = useState([])
     const [role, setRole] = useState('');
-    const [userID, setUserID] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
 
@@ -23,13 +21,12 @@ export default function ClassesScreen() {
         const fetchData = async () => {
             try {
                 // Fetch user ID
-                const storedUserID = await AsyncStorage.getItem('userID');
-                setUserID(storedUserID);
+                const userID = await AsyncStorage.getItem('userID');
 
                 // Fetch user data
-                if (storedUserID) {
+                if (userID) {
                     const response = await axiosAuth.get(
-                        `/User/get-user-detail/${storedUserID}`
+                        `/User/get-user-detail/${userID}`
                     );
                     const userData = response.data;
                     setRole(userData.userRole.roleName);
@@ -72,7 +69,7 @@ export default function ClassesScreen() {
                     <TouchableOpacity
                         key={item.id}
                         onPress={() => {
-                            // handle onPress
+                            navigation.navigate('DetailClass', { classID: item.id, role: role });
                         }}>
                         <View style={styles.card}>
 
@@ -116,7 +113,7 @@ export default function ClassesScreen() {
                                     </Text>
                                     <TouchableOpacity
                                         onPress={() => {
-                                            // handle onPress
+                                            navigation.navigate('DetailClass', { classID: item.id, role: role });
                                         }}>
                                         <View style={styles.btn}>
                                             <Text style={styles.btnText}>Go to course</Text>

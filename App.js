@@ -27,7 +27,7 @@ const AuthStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen
@@ -61,17 +61,19 @@ const BottomTabs = () => {
         name='Explore'
         component={ExploreScreen}
         options={{
+          headerShadowVisible: false,
           title: 'MindMasterMinds',
-
           headerTitleStyle: {
             color: GlobalStyles.colors.backgroundColorPrimary200,
             fontWeight: 'bold',
-            fontSize: 25
+            fontSize: 25,
+
           },
           tabBarLabel: 'Home',
           tabBarLabelStyle: {
             fontSize: 13
           },
+
           tabBarIcon: ({ size, color }) => <Ionicons name="home" size={size} color={color} />
         }}
       />
@@ -199,8 +201,9 @@ const Root = () => {
     async function prepare() {
       const fetchToken = async () => {
         const storedToken = await AsyncStorage.getItem('token')
+        const id = await AsyncStorage.getItem('id')
         if (storedToken) {
-          authCtx.authenticate(storedToken)
+          authCtx.authenticate(storedToken, id)
         }
         setAppIsReady(false)
       }

@@ -74,7 +74,7 @@ export default function EditProfileScreen({ navigation, route }) {
       setLastName(value);
     } else if (name === 'phoneNum') {
       setPhoneNum(value);
-      if (value && !value.match(/^0?[0-9]{9}$/)) {
+      if (value && !value.match(/(84|0[3|5|7|8|9])+([0-9]{8})\b/g)) {
         setPhoneNumError('Phone number must have 10 digits and start with 0.');
       } else {
         setPhoneNumError('');
@@ -192,9 +192,6 @@ export default function EditProfileScreen({ navigation, route }) {
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.buttonText}>History Order</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.containerSnackbar}>

@@ -136,6 +136,38 @@ export default function MyAccountScreen({ navigation }) {
             </View>
 
           </View>
+{/* 
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Preferences</Text>
+
+            <View style={styles.sectionBody}>
+              <View style={[styles.rowWrapper, styles.rowFirst]}>
+                <TouchableOpacity
+                  onPress={() => {
+                    // handle onPress
+                  }}
+                  style={styles.row}>
+
+                  <Text style={styles.rowLabel}>Language</Text>
+
+                  <View style={styles.rowSpacer} />
+
+                  <Text style={styles.rowValue}>English</Text>
+                
+                </TouchableOpacity>
+              </View>
+
+
+              <View>
+                <Text style={styles.profileName}>{username}</Text>
+
+                <Text style={styles.profileAddress}>
+                  {role}
+                </Text>
+              </View>
+            </View>
+
+          </View> */}
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Preferences</Text>

@@ -10,8 +10,7 @@ import LoadingOverlay from '../components/UI/LoadingOverlay';
 import { GlobalStyles } from '../constants/style';
 import useAxiosAuth from '../lib/hooks/useAxiosAuth';
 
-
-export default function ClassesScreen() {
+export default function ClassesScreen({navigation}) {
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
     const [isLoading, setIsLoading] = useState(false)
@@ -19,6 +18,7 @@ export default function ClassesScreen() {
     const [isLoadingMore, setIsLoadingMore] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
     const [refreshing, setRefreshing] = useState(false)
+    const [role, setRole] = useState('')
     const axiosAuth = useAxiosAuth()
 
     useEffect(() => {
@@ -37,6 +37,7 @@ export default function ClassesScreen() {
                 const userData = response.data;
                 console.log('userdata: ', userData.userRole.roleName);
                 const role = userData.userRole.roleName
+                setRole(role)
                 if (role === 'Tutor') {
 
                     const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=${page}&pageSize=5`);
@@ -59,7 +60,6 @@ export default function ClassesScreen() {
 
                 }
             }
-            // Fetch classes based on role
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -69,12 +69,12 @@ export default function ClassesScreen() {
     const renderItem = ({ item }) => {
         return (
             <>
-                <View style={{ backgroundColor: '#f3f5f9' }}>
+                <View >
                     <View contentContainerStyle={styles.container}>
                         <TouchableOpacity
                             key={item.id}
                             onPress={() => {
-                                // handle onPress
+                                navigation.navigate('DetailClass', { classID: item.id, role: role });
                             }}>
                             <View style={styles.card}>
 
@@ -118,7 +118,7 @@ export default function ClassesScreen() {
                                         </Text>
                                         <TouchableOpacity
                                             onPress={() => {
-                                                // handle onPress
+                                                navigation.navigate('DetailClass', { classID: item.id, role: role });
                                             }}>
                                             <View style={styles.btn}>
                                                 <Text style={styles.btnText}>Go to course</Text>
@@ -137,7 +137,7 @@ export default function ClassesScreen() {
 
     const renderLoader = () => {
         console.log('render loadder: ', isLoadingMore);
-        return isLoadingMore ? <ActivityIndicator /> : null;
+        return isLoadingMore ? <SkeletonLoader /> : null;
     };
 
 
@@ -155,8 +155,7 @@ export default function ClassesScreen() {
     return (
         <>
             <StatusBar backgroundColor="#000" />
-            {isLoading && <LoadingOverlay />}
-
+            {isLoading && <ActivityIndicator />}
             <FlatList
                 refreshControl={
                     <RefreshControl

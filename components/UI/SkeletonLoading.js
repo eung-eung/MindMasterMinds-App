@@ -25,7 +25,7 @@ const SkeletonLoader = () => {
       width: 50,
       height: 50,
       marginRight: 16,
-      backgroundColor: '#eee', // Placeholder color for image
+      backgroundColor: '#eee', 
     },
     skeletonContentWrapper: {
       flex: 1,

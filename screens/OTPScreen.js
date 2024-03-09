@@ -8,7 +8,7 @@ import { signUpUser } from '../util/auth'
 import { useNavigation } from '@react-navigation/native'
 import LoadingOverlay from '../components/UI/LoadingOverlay'
 
-export default function OTPScreen({ route }) {
+export default function OTPScreen ({ route }) {
     const [otpValues, setOtpValues] = useState('')
     const [disabled, setDisabled] = useState(true)
     const { email, lastName, firstName, password } = route.params

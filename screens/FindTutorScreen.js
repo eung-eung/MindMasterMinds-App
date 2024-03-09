@@ -64,7 +64,6 @@ export default function FindTutorScreen({ navigation }) {
             courseId: majorName,
             subjectId: subjectName
         })
-        console.log("courseSubjectId", response.data.id)
         return response.data.id
 
     }
@@ -103,7 +102,7 @@ export default function FindTutorScreen({ navigation }) {
                 order.summary = summaryValue.trim();
                 order.quantity = lessons;
                 order.study = date instanceof Date ? date : date.toDate();
-                order.stateInfo = isNormal; 
+                order.stateInfo = isNormal;
                 order.phone = phoneNumber.trim();
                 try {
                     const response = await axiosAuth.post('/Order', {
@@ -122,7 +121,6 @@ export default function FindTutorScreen({ navigation }) {
                     console.log('Order response:', response.data);
                     alert('Posted successfully');
                     navigation.navigate('Classes');
-                    
 
                 } catch (error) {
                     console.error('Order submission error:', error);
@@ -139,7 +137,7 @@ export default function FindTutorScreen({ navigation }) {
             }
         }
     };
-    
+
 
 
     useEffect(() => {
@@ -164,8 +162,6 @@ export default function FindTutorScreen({ navigation }) {
 
 
     const handleMajorChange = (value) => {
-        console.log("handleMajorChange: ", value)
-
         getListSubjects(value);
         setMajorName(value);
     };
@@ -185,229 +181,202 @@ export default function FindTutorScreen({ navigation }) {
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-        <ScrollView style={{ backgroundColor: 'white' }}>
-            {/* {isLoading && <ActivityIndicator />} */}
-            <View style={styles.container}>
-                <Text style={styles.label}>Summary of tutor request:</Text>
-                <TextInput
-                    name="summary"
-                    id="summary"
-                    style={styles.input}
-                    value={summaryValue}
-                    multiline={true}
-                    numberOfLines={5}
-                    onChangeText={(text) => setSummaryValue(text)}
-                />
-                <Text style={styles.label}>Contact Phone:</Text>
-                <TextInput
-                    name="phone"
-                    id="phone"
-                    style={styles.input}
-                    value={phoneNumber}
-                    onChangeText={setPhoneNumber}
-                    multiline={true}
-                    inputMode="numeric"
-                />
-                <Text style={styles.label}>Describe the tutoring request in detail:</Text>
-                <TextInput
-                    id="describe"
-                    name="describe"
-                    style={styles.input}
-                    value={descriptionValue}
-                    multiline={true}
-                    numberOfLines={5}
-                    onChangeText={(text) => setDescriptionValue(text)}
-                />
-                <View style={{ marginBottom: 20 }}>
-                    <Text style={styles.label}>Major</Text>
-                    <View style={{ marginBottom: 10 }}>
-
-                        {/* <Picker
-                            selectedValue={majorName}
-                            onValueChange={(itemValue) => handleMajorChange(itemValue)}
-                        >
-                            <Picker.Item label="Select Major" value="" />
-                            {majorList.map((major) => (
-                                <Picker.Item key={major.id} label={major.code} value={major.id} />
-                            ))}
-                        </Picker> */}
-                        <Dropdown
-                            style={styles.dropdown}
-                            data={majorList.map(major => ({ label: major.code, value: major.id }))}
-                            value={selectedMajor}
-                            placeholder="Select Major"
-                            labelField="label"
-                            valueField="value"
-
-                            maxHeight={300}
-                            inputSearchStyle={styles.inputSearchStyle}
-                            onChange={item => {
-                                setSelectedMajor(item.value);
-                                handleMajorChange(item.value);
-                            }}
-                        />
-                    </View>
-                </View>
-                <View style={{ marginBottom: 20 }}>
-                    <Text>
-                        {majorName ? 'Subject' : 'Please select major'}
-                    </Text>
-                    <View style={{ marginTop: 8 }}>
-                        {/* {majorName ?
-                            <Picker
-                                selectedValue={subjectName}
-                                onValueChange={handleSubjectChange}
-                                mode="dropdown"
-                                enabled={!!majorName}
-                            >
-                                <Picker.Item label="Select Subject" value={null} />
-                                {subjectList.map((subject) => (
-                                    <Picker.Item key={subject.id} label={subject.code} value={subject.id} />
-                                ))}
-                            </Picker>
-                            :
-                            <Text style={{ fontSize: 16, marginRight: 8 }}>Please select major</Text>
-                        } */}
-                        <Dropdown
-                            style={styles.dropdown}
-                            data={subjectList.map(subject => ({ label: subject.code, value: subject.id }))}
-                            value={selectedSubject}
-                            placeholder={!majorName ? 'Select subject' : ''}
-                            labelField="label"
-                            valueField="value"
-
-                            maxHeight={300}
-                            onChange={item => {
-                                setSelectedSubject(item.value);
-                                handleSubjectChange(item.value);
-                            }}
-                        />
-                    </View>
-                </View>
-                <View style={{ marginBottom: 20 }}>
-                    <Text style={styles.label}>Estimated tuition fees:</Text>
-                    <View style={{ marginTop: 8 }}>
-                        {majorName && subjectName ?
-                            <View>
-                                {
-                                    isCalculateFee
-                                        ?
-                                        <ActivityIndicator />
-                                        :
-                                        <TextInput
-                                            name="estimated"
-                                            id="estimated"
-                                            value={feeNumber.toLocaleString() + ' ' + 'VND'}
-                                            style={styles.input}
-                                            placeholder="Click button to see fee"
-                                            editable={false}
-                                        />
-                                }
-                            </View>
-                            :
-                            <View style={{ marginRight: 10 }}>
-                                <Text style={{ fontSize: 16 }}>Please select subject and major</Text>
-                            </View>}
-                    </View>
-                </View>
-
-                <View >
-                    <Text style={styles.label}>Status:</Text>
-                    <View style={{ flexDirection: 'row' }}>
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
-                            <RadioButton.Item
-                                label="Normal"
-                                status={isNormal ? 'checked' : 'unchecked'}
-                                onPress={() => setIsNormal(true)}
-                                color="blue"
-                                id="normal"
-                                name="normal"
-                            />
-                        </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <RadioButton.Item
-                                label='Urgent'
-                                status={!isNormal ? 'checked' : 'unchecked'}
-                                onPress={() => setIsNormal(false)}
-                                color="blue"
-                                id="urgent"
-                                name="urgent"
-                            />
-                        </View>
-                    </View>
-                </View>
-
-                <View >
-                    <Text style={styles.label}>Number of lessons per week:</Text>
-                    <View style={{ flexDirection: 'row' }}>
-                        <View style={{ flex: 1, marginRight: 12 }}>
-                            <RadioButton.Item
-                                label="1 Session"
-                                value={1}
-                                status={lessons === 1 ? 'checked' : 'unchecked'}
-                                onPress={() => setLessons(1)}
-                                color="blue"
-                            />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <RadioButton.Item
-                                label="2 Session"
-                                value={2}
-                                status={lessons === 2 ? 'checked' : 'unchecked'}
-                                onPress={() => setLessons(2)}
-                                color="blue"
-                            />
-                        </View>
-                    </View>
-                    <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                        <View style={{ flex: 1, marginRight: 12 }}>
-                            <RadioButton.Item
-                                label="3 Session"
-                                value={3}
-                                status={lessons === 3 ? 'checked' : 'unchecked'}
-                                onPress={() => setLessons(3)}
-                                color="blue"
-                            />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <RadioButton.Item
-                                label="4 Session"
-                                value={4}
-                                status={lessons === 4 ? 'checked' : 'unchecked'}
-                                onPress={() => setLessons(4)}
-                                color="blue"
-                            />
-                        </View>
-                    </View>
-                </View>
-
-                <Text style={styles.label}>Expected date of study:</Text>
-                <View style={{ flexDirection: 'row', paddingLeft: 12, marginTop: 12 }}>
-
+            <ScrollView style={{ backgroundColor: 'white' }}>
+                {/* {isLoading && <ActivityIndicator />} */}
+                <View style={styles.container}>
+                    <Text style={styles.label}>Summary of tutor request:</Text>
                     <TextInput
-                        style={styles.inputDate}
-                        editable={false}
-                        value={formatDate(date)}
+                        name="summary"
+                        id="summary"
+                        style={styles.input}
+                        value={summaryValue}
+                        multiline={true}
+                        numberOfLines={5}
+                        onChangeText={(text) => setSummaryValue(text)}
                     />
-                    <FontAwesome5 name="calendar-alt" size={24} style={styles.icon} color="black" onPress={showDatePicker} />
-
-                    <DateTimePickerModal
-                        isVisible={isDatePickerVisible}
-                        mode="date"
-                        date={date}
-                        onConfirm={handleDateChange}
-                        onCancel={hideDatePicker}
+                    <Text style={styles.label}>Contact Phone:</Text>
+                    <TextInput
+                        name="phone"
+                        id="phone"
+                        style={styles.input}
+                        value={phoneNumber}
+                        onChangeText={setPhoneNumber}
+                        multiline={true}
+                        inputMode="numeric"
                     />
-                </View>
+                    <Text style={styles.label}>Describe the tutoring request in detail:</Text>
+                    <TextInput
+                        id="describe"
+                        name="describe"
+                        style={styles.input}
+                        value={descriptionValue}
+                        multiline={true}
+                        numberOfLines={5}
+                        onChangeText={(text) => setDescriptionValue(text)}
+                    />
+                    <View style={{ marginBottom: 20 }}>
+                        <Text style={styles.label}>Major</Text>
+                        <View style={{ marginBottom: 10 }}>
+                            <Dropdown
+                                style={styles.dropdown}
+                                data={majorList.map(major => ({ label: major.code, value: major.id }))}
+                                value={selectedMajor}
+                                placeholder="Select Major"
+                                labelField="label"
+                                valueField="value"
+                                maxHeight={300}
+                                inputSearchStyle={styles.inputSearchStyle}
+                                onChange={item => {
+                                    setSelectedMajor(item.value);
+                                    handleMajorChange(item.value);
+                                }}
+                            />
+                        </View>
+                    </View>
+                    <View style={{ marginBottom: 20 }}>
+                        <Text>
+                            {majorName ? 'Subject' : 'Please select major'}
+                        </Text>
+                        <View style={{ marginTop: 8 }}>
+                            <Dropdown
+                                style={styles.dropdown}
+                                data={subjectList.map(subject => ({ label: subject.code, value: subject.id }))}
+                                value={selectedSubject}
+                                placeholder={!majorName ? 'Select subject' : subjectList.length > 0 ? subjectList[0].code : ''}
+                                labelField="label"
+                                valueField="value"
+                                maxHeight={300}
+                                onChange={item => {
+                                    setSelectedSubject(item.value);
+                                    handleSubjectChange(item.value);
+                                }}
+                            />
+                        </View>
+                    </View>
+                    <View style={{ marginBottom: 20 }}>
+                        <Text style={styles.label}>Estimated tuition fees:</Text>
+                        <View style={{ marginTop: 8 }}>
+                            {majorName && subjectName ?
+                                <View>
+                                    {
+                                        isCalculateFee
+                                            ?
+                                            <ActivityIndicator />
+                                            :
+                                            <TextInput
+                                                name="estimated"
+                                                id="estimated"
+                                                value={feeNumber.toLocaleString() + ' ' + 'VND'}
+                                                style={styles.input}
+                                                placeholder="Click button to see fee"
+                                                editable={false}
+                                            />
+                                    }
+                                </View>
+                                :
+                                <View style={{ marginRight: 10 }}>
+                                    <Text style={{ fontSize: 16 }}>Please select subject and major</Text>
+                                </View>}
+                        </View>
+                    </View>
 
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={handleSubmitPost}>
-                        <Text style={styles.buttonText}>Post Request</Text>
-                    </TouchableOpacity>
+                    <View >
+                        <Text style={styles.label}>Status:</Text>
+                        <View style={{ flexDirection: 'row' }}>
+
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
+                                <RadioButton.Item
+                                    label="Normal"
+                                    status={isNormal ? 'checked' : 'unchecked'}
+                                    onPress={() => setIsNormal(true)}
+                                    color="blue"
+                                    id="normal"
+                                    name="normal"
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <RadioButton.Item
+                                    label='Urgent'
+                                    status={!isNormal ? 'checked' : 'unchecked'}
+                                    onPress={() => setIsNormal(false)}
+                                    color="blue"
+                                    id="urgent"
+                                    name="urgent"
+                                />
+                            </View>
+                        </View>
+                    </View>
+
+                    <View >
+                        <Text style={styles.label}>Number of lessons per week:</Text>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View style={{ flex: 1, marginRight: 12 }}>
+                                <RadioButton.Item
+                                    label="1 Session"
+                                    value={1}
+                                    status={lessons === 1 ? 'checked' : 'unchecked'}
+                                    onPress={() => setLessons(1)}
+                                    color="blue"
+                                />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <RadioButton.Item
+                                    label="2 Session"
+                                    value={2}
+                                    status={lessons === 2 ? 'checked' : 'unchecked'}
+                                    onPress={() => setLessons(2)}
+                                    color="blue"
+                                />
+                            </View>
+                        </View>
+                        <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                            <View style={{ flex: 1, marginRight: 12 }}>
+                                <RadioButton.Item
+                                    label="3 Session"
+                                    value={3}
+                                    status={lessons === 3 ? 'checked' : 'unchecked'}
+                                    onPress={() => setLessons(3)}
+                                    color="blue"
+                                />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <RadioButton.Item
+                                    label="4 Session"
+                                    value={4}
+                                    status={lessons === 4 ? 'checked' : 'unchecked'}
+                                    onPress={() => setLessons(4)}
+                                    color="blue"
+                                />
+                            </View>
+                        </View>
+                    </View>
+
+                    <Text style={styles.label}>Expected date of study:</Text>
+                    <View style={{ flexDirection: 'row', paddingLeft: 12, marginTop: 12 }}>
+
+                        <TextInput
+                            style={styles.inputDate}
+                            editable={false}
+                            value={formatDate(date)}
+                        />
+                        <FontAwesome5 name="calendar-alt" size={24} style={styles.icon} color="black" onPress={showDatePicker} />
+
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            date={date}
+                            onConfirm={handleDateChange}
+                            onCancel={hideDatePicker}
+                        />
+                    </View>
+
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.button} onPress={handleSubmitPost}>
+                            <Text style={styles.buttonText}>Post Request</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
         </KeyboardAvoidingView>
     )
 }
@@ -429,7 +398,7 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
-        paddingHorizontal:10,
+        paddingHorizontal: 10,
         fontSize: 16,
         paddingTop: 10,
         paddingBottom: 8

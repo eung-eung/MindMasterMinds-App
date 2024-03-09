@@ -6,8 +6,7 @@ import LoadingOverlay from '../components/UI/LoadingOverlay';
 import * as ImagePicker from 'expo-image-picker';
 import { Snackbar } from 'react-native-paper';
 
-export default function EditProfileScreen({ navigation, route }) {
-  const { userID } = route.params;
+export default function EditProfileScreen({ navigation}) {
   const authCtx = useContext(AuthConText);
   const token = authCtx.accessToken;
 
@@ -32,7 +31,7 @@ export default function EditProfileScreen({ navigation, route }) {
 
   const fetchData = async () => {
     try {
-      const response = await axiosAuth.get(`/User/get-user-detail/${userID}`);
+      const response = await axiosAuth.get(`/User/get-user-detail/${authCtx.id}`);
       const userData = response.data;
       setFirstName(userData.firstName || '');
       setLastName(userData.lastName || '');
@@ -40,6 +39,7 @@ export default function EditProfileScreen({ navigation, route }) {
       setEmail(userData.email || '');
       setAvatarURL(userData.avatar || null);
       setBalance(userData.wallet.balance);
+      console.log("authCtx.id",authCtx.id)
       setLoading(false);
     } catch (error) {
       console.error('Error fetching user data:', error);

@@ -29,43 +29,30 @@ export default function MyAccountScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState(null);
-  const [userID, setUserID] = useState('');
   const [role, setRole] = useState('')
 
 
-  useEffect(() => {
-    const fetchUserID = async () => {
-      try {
-        const storedUserID = await AsyncStorage.getItem('userID');
-        setUserID(storedUserID);
-      } catch (error) {
-        console.error('Error fetching user ID from AsyncStorage:', error);
-      }
-    };
-
-    fetchUserID();
-  }, []);
+ 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (userID) {
           const response = await axiosAuth.get(
-            `/User/get-user-detail/${userID}`
+            `/User/get-user-detail/${authCtx.id}`
           );
           const userData = response.data;
           setUsername(userData.firstName + ' ' + userData.lastName || '');
           setEmail(userData.email || '');
           setAvatar(userData.avatar || null);
           setRole(userData.userRole.roleName)
-        }
+        
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
     };
 
     fetchData();
-  }, [userID, isFocused]);
+  }, [authCtx.id, isFocused]);
 
   const [form, setForm] = useState({
     emailNotifications: true,
@@ -93,7 +80,7 @@ export default function MyAccountScreen({ navigation }) {
             <View style={styles.profile}>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate('Profile', { userID: userID });
+                  navigation.navigate('Profile');
                 }}>
                 <View style={styles.profileAvatarWrapper}>
                   {avatar ? (
@@ -114,7 +101,7 @@ export default function MyAccountScreen({ navigation }) {
 
                   <TouchableOpacity
                     onPress={() => {
-                      navigation.navigate('Profile', { userID: userID });
+                      navigation.navigate('Profile');
                     }}>
                     <View style={styles.profileAction}>
                       <FeatherIcon

@@ -137,7 +137,7 @@ export default function MyAccountScreen({ navigation }) {
             </View>
 
           </View>
-
+{/* 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Preferences</Text>
 
@@ -168,7 +168,7 @@ export default function MyAccountScreen({ navigation }) {
               </View>
             </View>
 
-          </View>
+          </View> */}
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Preferences</Text>

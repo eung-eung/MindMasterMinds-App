@@ -98,7 +98,7 @@ export default function DetailClassScreen({ navigation, route }) {
     }
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{backgroundColor: 'white'}}>
             {loading ?
                 <SkeletonLoader /> :
                 <ScrollView contentContainerStyle={styles.container}>

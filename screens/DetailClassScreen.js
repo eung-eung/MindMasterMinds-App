@@ -77,34 +77,11 @@ export default function DetailClassScreen({ navigation, route }) {
                 tutorId: tutorId,
                 orderId: classID
             })
-            // toast.success('Approved successfully!', {
-            //     position: "top-center",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: true,
-            //     pauseOnHover: false,
-            //     draggable: true,
-            //     progress: undefined,
-            //     theme: "light",
-            //     transition: Bounce,
-            // });
             alert('Approve successfully!')
             setRefresh((prev) => !prev)
 
         } catch (error) {
-            // toast.error('Approve failed!', {
-            //     position: "top-center",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: true,
-            //     pauseOnHover: false,
-            //     draggable: true,
-            //     progress: undefined,
-            //     theme: "light",
-            //     transition: Bounce,
-            // });
             alert('Approve failed!')
-
         }
     }
 
@@ -115,26 +92,13 @@ export default function DetailClassScreen({ navigation, route }) {
             console.log('success')
         } catch (error) {
             console.log('error: ', error.response.data.Message);
-            // toast.error(error.response.data.Message, {
-            //     position: "top-center",
-            //     autoClose: 3000,
-            //     hideProgressBar: false,
-            //     closeOnClick: true,
-            //     pauseOnHover: false,
-            //     draggable: true,
-            //     progress: undefined,
-            //     theme: "light",
-            //     transition: Bounce,
-            // });
             alert('error.response.data.Message')
         }
 
     }
 
     return (
-
-
-        <SafeAreaView style={{ backgroundColor: '#fff' }}>
+        <SafeAreaView>
             {loading ?
                 <SkeletonLoader /> :
                 <ScrollView contentContainerStyle={styles.container}>
@@ -199,7 +163,7 @@ export default function DetailClassScreen({ navigation, route }) {
                                             {
                                                 listTutors.length === 0 ?
                                                     <View style={{ flex: 1, backgroundColor: '#fff' }}>
-                                                        <Text>
+                                                        <Text style={{ textAlign: 'center' }}>
                                                             There is no application list yet
                                                         </Text>
                                                     </View>

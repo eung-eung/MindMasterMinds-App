@@ -1,9 +1,17 @@
-import { View, Text } from 'react-native'
+import { View, Text, ActivityIndicator, StyleSheet, TextInput, ScrollView, Button, TouchableOpacity, KeyboardAvoidingView } from 'react-native'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AuthConText } from '../store/auth-context';
 import { axiosAuth } from '../lib/axios';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { RadioButton } from 'react-native-paper';
+import dayjs from 'dayjs'
+import { Picker } from '@react-native-picker/picker';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { FontAwesome5 } from '@expo/vector-icons';
+import { Dropdown } from 'react-native-element-dropdown';
 
-export default function FindTutorScreen({navigation}) {
+
+export default function FindTutorScreen({ navigation }) {
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
     const [isNormal, setIsNormal] = useState(true)
@@ -12,14 +20,26 @@ export default function FindTutorScreen({navigation}) {
     const [majorName, setMajorName] = useState('');
     const [majorList, setMajorList] = useState([])
     const [subjectName, setSubjectName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('')
     const [feeNumber, setFeeNumber] = useState(0)
     const [subjectList, setSubjectList] = useState([])
-    const [date, setDate] = useState(dayjs(new Date().setDate(new Date().getDate() + 1)))
+    const [date, setDate] = useState(dayjs(new Date().setDate(new Date().getDate() + 1)).toDate());
     const [lessons, setLessons] = useState(1)
-    const description = useRef<HTMLTextAreaElement>(null)
-    const summary = useRef<HTMLInputElement>(null)
-    const phone = useRef<HTMLInputElement>(null)
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [descriptionValue, setDescriptionValue] = useState('');
+    const [summaryValue, setSummaryValue] = useState('');
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+    const [selectedMajor, setSelectedMajor] = useState('');
+    const [selectedSubject, setSelectedSubject] = useState('');
+
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
 
     const getListMajors = async () => {
         const response = await axiosAuth.get('/Course?pageNumber=0&pageSize=100')
@@ -39,16 +59,14 @@ export default function FindTutorScreen({navigation}) {
         return phone.match(regexPhoneNumber) ? true : false;
     }
 
-    const handlePhoneChange = (e) => {
-        setPhoneNumber(e.target.value)
-    }
-
     const getCourseSubjectId = async () => {
         const response = await axiosAuth.post('/CourseSubject/get-course-subject', {
             courseId: majorName,
             subjectId: subjectName
         })
+        console.log("courseSubjectId", response.data.id)
         return response.data.id
+
     }
 
     const getTuitionFees = async () => {
@@ -67,84 +85,62 @@ export default function FindTutorScreen({navigation}) {
         setFeeNumber(0)
     }, [majorName])
 
-    const handleSubmitPost = async (e) => {
-        e.preventDefault()
-        const order = {} 
+
+    const handleSubmitPost = async () => {
+        const order = {};
         if (
             majorName &&
             subjectName &&
-            description.current &&
-            description.current.value.trim() &&
-            summary.current &&
-            summary.current.value.trim() &&
-            phone.current &&
-            regexPhoneNumber(phone.current?.value)
+            descriptionValue.trim() &&
+            summaryValue.trim() &&
+            phoneNumber &&
+            regexPhoneNumber(phoneNumber)
         ) {
-            const courseSubjectId = await getCourseSubjectId()
-            order.courseSubjectId = courseSubjectId
-            order.description = description.current.value.trim()
-            order.summary = summary.current.value.trim()
-            order.quantity = lessons
-            order.study = date.toDate()
-            order.stateInfo = !isNormal
-            order.phone = phone.current.value.trim()
-            try {
-                const response = await axiosAuth.post('/Order/missing-order-by-student', '5AE02E33-2C97-4562-B246-85113EA4CC54')
-                console.log('money: ', response);
+            const courseSubjectId = await getCourseSubjectId();
+            if (courseSubjectId) {
+                order.courseSubjectId = courseSubjectId;
+                order.description = descriptionValue.trim();
+                order.summary = summaryValue.trim();
+                order.quantity = lessons;
+                order.study = date instanceof Date ? date : date.toDate();
+                order.stateInfo = isNormal; 
+                order.phone = phoneNumber.trim();
+                try {
+                    const response = await axiosAuth.post('/Order', {
+                        summary: order.summary,
+                        courseSubjectId: order.courseSubjectId,
+                        stateInfo: order.stateInfo,
+                        phone: order.phone,
+                        description: order.description,
+                        quantity: order.quantity,
+                        study: order.study
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
+                    });
+                    console.log('Order response:', response.data);
+                    alert('Posted successfully');
+                    navigation.navigate('Classes');
+                    
 
-                // const response = await axiosAuth.post('/Order', {
-                //     summary: order.summary,
-                //     courseSubjectId: order.courseSubjectId,
-                //     stateInfo: order.stateInfo,
-                //     phone: order.phone,
-                //     description: order.description,
-                //     quantity: order.quantity,
-                //     study: order.study
-                // })
-                toast.success('Posted successfully', {
-                    position: "top-center",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                    transition: Bounce,
-                });
-                // redirect('/listClasses')
-                navigation.navigate('Classes')
-            } catch (error) {
-                toast.error(error.response.data.Message, {
-                    position: "top-center",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                    transition: Bounce,
-                });
+                } catch (error) {
+                    console.error('Order submission error:', error);
+                    alert(error.response.data.Message);
+                }
+            } else {
+                alert('Failed to retrieve courseSubjectId');
             }
-
         } else {
-            toast.error('Please fill all fields', {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Bounce,
-            });
-
+            if (!phoneNumber || !regexPhoneNumber(phoneNumber)) {
+                alert('Please enter a valid phone number');
+            } else {
+                alert('Please fill all fields');
+            }
         }
+    };
+    
 
-
-    }
 
     useEffect(() => {
         getTuitionFees()
@@ -154,53 +150,356 @@ export default function FindTutorScreen({navigation}) {
         const currentDate = new Date().getTime()
         const pickedDate = new Date(value.$d).getTime()
         if (currentDate > pickedDate) {
-            toast.error('You cannot choose a past date', {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Bounce,
-            });
+            alert('You cannot choose a past date');
             setDate(dayjs(new Date().setDate(new Date().getDate() + 1)))
         }
+        hideDatePicker();
     }
-    const handleMajorChange = (event) => {
-        const {
-            target: { value },
-        } = event;
 
-        getListSubjects(value)
-        setMajorName(
-            value
-        );
+
+    const formatDate = (date) => {
+        if (!date) return "YYYY-MM-DD";
+        return dayjs(date).format("YYYY-MM-DD");
     };
-    const handleSubjectChange = (event) => {
-        const {
-            target: { value },
-        } = event;
-        setSubjectName(
-            value
-        );
+
+
+    const handleMajorChange = (value) => {
+        console.log("handleMajorChange: ", value)
+
+        getListSubjects(value);
+        setMajorName(value);
+    };
+
+
+
+
+    const handleSubjectChange = (value) => {
+        setSubjectName(value);
+
     };
 
     useEffect(() => {
         getListMajors()
     }, [])
 
-//    useEffect(() => {
-//         if (status !== 'loading') setLoading(false)
-//         if (!session && status === 'unauthenticated') {
-//             redirect('/signIn')
-//         }
-//     }, [status])
 
     return (
-        <View>
-            <Text>FindTutorScreen</Text>
-        </View>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <ScrollView style={{ backgroundColor: 'white' }}>
+            {/* {isLoading && <ActivityIndicator />} */}
+            <View style={styles.container}>
+                <Text style={styles.label}>Summary of tutor request:</Text>
+                <TextInput
+                    name="summary"
+                    id="summary"
+                    style={styles.input}
+                    value={summaryValue}
+                    multiline={true}
+                    numberOfLines={5}
+                    onChangeText={(text) => setSummaryValue(text)}
+                />
+                <Text style={styles.label}>Contact Phone:</Text>
+                <TextInput
+                    name="phone"
+                    id="phone"
+                    style={styles.input}
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                    multiline={true}
+                    inputMode="numeric"
+                />
+                <Text style={styles.label}>Describe the tutoring request in detail:</Text>
+                <TextInput
+                    id="describe"
+                    name="describe"
+                    style={styles.input}
+                    value={descriptionValue}
+                    multiline={true}
+                    numberOfLines={5}
+                    onChangeText={(text) => setDescriptionValue(text)}
+                />
+                <View style={{ marginBottom: 20 }}>
+                    <Text style={styles.label}>Major</Text>
+                    <View style={{ marginBottom: 10 }}>
+
+                        {/* <Picker
+                            selectedValue={majorName}
+                            onValueChange={(itemValue) => handleMajorChange(itemValue)}
+                        >
+                            <Picker.Item label="Select Major" value="" />
+                            {majorList.map((major) => (
+                                <Picker.Item key={major.id} label={major.code} value={major.id} />
+                            ))}
+                        </Picker> */}
+                        <Dropdown
+                            style={styles.dropdown}
+                            data={majorList.map(major => ({ label: major.code, value: major.id }))}
+                            value={selectedMajor}
+                            placeholder="Select Major"
+                            labelField="label"
+                            valueField="value"
+
+                            maxHeight={300}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            onChange={item => {
+                                setSelectedMajor(item.value);
+                                handleMajorChange(item.value);
+                            }}
+                        />
+                    </View>
+                </View>
+                <View style={{ marginBottom: 20 }}>
+                    <Text>
+                        {majorName ? 'Subject' : 'Please select major'}
+                    </Text>
+                    <View style={{ marginTop: 8 }}>
+                        {/* {majorName ?
+                            <Picker
+                                selectedValue={subjectName}
+                                onValueChange={handleSubjectChange}
+                                mode="dropdown"
+                                enabled={!!majorName}
+                            >
+                                <Picker.Item label="Select Subject" value={null} />
+                                {subjectList.map((subject) => (
+                                    <Picker.Item key={subject.id} label={subject.code} value={subject.id} />
+                                ))}
+                            </Picker>
+                            :
+                            <Text style={{ fontSize: 16, marginRight: 8 }}>Please select major</Text>
+                        } */}
+                        <Dropdown
+                            style={styles.dropdown}
+                            data={subjectList.map(subject => ({ label: subject.code, value: subject.id }))}
+                            value={selectedSubject}
+                            placeholder={!majorName ? 'Select subject' : ''}
+                            labelField="label"
+                            valueField="value"
+
+                            maxHeight={300}
+                            onChange={item => {
+                                setSelectedSubject(item.value);
+                                handleSubjectChange(item.value);
+                            }}
+                        />
+                    </View>
+                </View>
+                <View style={{ marginBottom: 20 }}>
+                    <Text style={styles.label}>Estimated tuition fees:</Text>
+                    <View style={{ marginTop: 8 }}>
+                        {majorName && subjectName ?
+                            <View>
+                                {
+                                    isCalculateFee
+                                        ?
+                                        <ActivityIndicator />
+                                        :
+                                        <TextInput
+                                            name="estimated"
+                                            id="estimated"
+                                            value={feeNumber.toLocaleString() + ' ' + 'VND'}
+                                            style={styles.input}
+                                            placeholder="Click button to see fee"
+                                            editable={false}
+                                        />
+                                }
+                            </View>
+                            :
+                            <View style={{ marginRight: 10 }}>
+                                <Text style={{ fontSize: 16 }}>Please select subject and major</Text>
+                            </View>}
+                    </View>
+                </View>
+
+                <View >
+                    <Text style={styles.label}>Status:</Text>
+                    <View style={{ flexDirection: 'row' }}>
+
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
+                            <RadioButton.Item
+                                label="Normal"
+                                status={isNormal ? 'checked' : 'unchecked'}
+                                onPress={() => setIsNormal(true)}
+                                color="blue"
+                                id="normal"
+                                name="normal"
+                            />
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <RadioButton.Item
+                                label='Urgent'
+                                status={!isNormal ? 'checked' : 'unchecked'}
+                                onPress={() => setIsNormal(false)}
+                                color="blue"
+                                id="urgent"
+                                name="urgent"
+                            />
+                        </View>
+                    </View>
+                </View>
+
+                <View >
+                    <Text style={styles.label}>Number of lessons per week:</Text>
+                    <View style={{ flexDirection: 'row' }}>
+                        <View style={{ flex: 1, marginRight: 12 }}>
+                            <RadioButton.Item
+                                label="1 Session"
+                                value={1}
+                                status={lessons === 1 ? 'checked' : 'unchecked'}
+                                onPress={() => setLessons(1)}
+                                color="blue"
+                            />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <RadioButton.Item
+                                label="2 Session"
+                                value={2}
+                                status={lessons === 2 ? 'checked' : 'unchecked'}
+                                onPress={() => setLessons(2)}
+                                color="blue"
+                            />
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                        <View style={{ flex: 1, marginRight: 12 }}>
+                            <RadioButton.Item
+                                label="3 Session"
+                                value={3}
+                                status={lessons === 3 ? 'checked' : 'unchecked'}
+                                onPress={() => setLessons(3)}
+                                color="blue"
+                            />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <RadioButton.Item
+                                label="4 Session"
+                                value={4}
+                                status={lessons === 4 ? 'checked' : 'unchecked'}
+                                onPress={() => setLessons(4)}
+                                color="blue"
+                            />
+                        </View>
+                    </View>
+                </View>
+
+                <Text style={styles.label}>Expected date of study:</Text>
+                <View style={{ flexDirection: 'row', paddingLeft: 12, marginTop: 12 }}>
+
+                    <TextInput
+                        style={styles.inputDate}
+                        editable={false}
+                        value={formatDate(date)}
+                    />
+                    <FontAwesome5 name="calendar-alt" size={24} style={styles.icon} color="black" onPress={showDatePicker} />
+
+                    <DateTimePickerModal
+                        isVisible={isDatePickerVisible}
+                        mode="date"
+                        date={date}
+                        onConfirm={handleDateChange}
+                        onCancel={hideDatePicker}
+                    />
+                </View>
+
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.button} onPress={handleSubmitPost}>
+                        <Text style={styles.buttonText}>Post Request</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </ScrollView>
+        </KeyboardAvoidingView>
     )
 }
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        marginLeft: 30,
+        marginRight: 30,
+        marginBottom: 40,
+        marginTop: 10
+    },
+    label: {
+        marginTop: 20,
+        marginBottom: 5,
+        fontWeight: 'bold',
+        fontSize: 16
+    },
+    input: {
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal:10,
+        fontSize: 16,
+        paddingTop: 10,
+        paddingBottom: 8
+    },
+    avatarContainer: {
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    avatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+    },
+    buttonContainer: {
+        marginTop: 30,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    button: {
+        backgroundColor: '#8DF0C8',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        flex: 1,
+        marginHorizontal: 5,
+    },
+    buttonText: {
+        color: 'black',
+        fontSize: 15,
+        textAlign: 'center'
+    },
+    containerSnackbar: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    inputDate: {
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        padding: 10,
+        fontSize: 15,
+        marginRight: 10,
+        width: 150
+    },
+    icon: {
+        marginTop: 8
+    },
+    buttonContainer: {
+        marginTop: 30,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    button: {
+        backgroundColor: '#8DF0C8',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        flex: 1,
+        marginHorizontal: 5,
+    },
+    buttonText: {
+        color: 'black',
+        fontSize: 15,
+        textAlign: 'center'
+    },
+    dropdown: {
+        height: 50,
+        borderColor: 'gray',
+        borderWidth: 0.5,
+        borderRadius: 8,
+        paddingHorizontal: 8,
+    },
+});

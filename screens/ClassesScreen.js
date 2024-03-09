@@ -69,7 +69,7 @@ export default function ClassesScreen({navigation}) {
     const renderItem = ({ item }) => {
         return (
             <>
-                <View style={{ backgroundColor: '#f3f5f9' }}>
+                <View >
                     <View contentContainerStyle={styles.container}>
                         <TouchableOpacity
                             key={item.id}
@@ -155,7 +155,7 @@ export default function ClassesScreen({navigation}) {
     return (
         <>
             <StatusBar backgroundColor="#000" />
-            {isLoading && <LoadingOverlay />}
+            {isLoading && <ActivityIndicator />}
             <FlatList
                 refreshControl={
                     <RefreshControl

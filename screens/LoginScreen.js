@@ -12,8 +12,10 @@ export default function LoginScreen() {
     const signInHandler = async ({ email, password }) => {
         setIsAuthenticating(true)
         try {
-            const token = await getUser(email, password)
-            authCtx.authenticate(token)
+            const { token, userID } = await getUser(email, password)
+            console.log('token: ', token);
+            console.log('id: ', userID);
+            authCtx.authenticate(token, userID)
         } catch (error) {
             Alert.alert("Login Failed!", 'Could not log you in. Please check again!')
             setIsAuthenticating(false)

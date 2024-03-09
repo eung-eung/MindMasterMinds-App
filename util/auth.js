@@ -11,9 +11,9 @@ export async function getUser(email, password) {
     const userID = response.data.userViewLogin.id;
     console.log(userID)
 
-    await AsyncStorage.setItem('userID', userID);
 
-    return token
+
+    return { token, userID }
 
 }
 

@@ -23,7 +23,6 @@ import OTPScreen from './screens/OTPScreen'
 const Stack = createNativeStackNavigator()
 const Bottoms = createBottomTabNavigator()
 
-
 const AuthStack = () => {
   return (
     <Stack.Navigator
@@ -63,16 +62,7 @@ const BottomTabs = () => {
         component={ExploreScreen}
         options={{
           title: 'MindMasterMinds',
-          headerRight: () => (
-            <Ionicons
-              name='exit'
-              color={GlobalStyles.colors.backgroundColorPrimary200}
-              size={30}
-              onPress={() => {
-                authCtx.logout()
-              }}
-            />
-          ),
+
           headerTitleStyle: {
             color: GlobalStyles.colors.backgroundColorPrimary200,
             fontWeight: 'bold',
@@ -151,7 +141,10 @@ const AuthenticatedStack = () => {
       <Stack.Screen
         name='BottomTabs'
         component={BottomTabs}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          title: ''
+        }}
       />
       <Stack.Screen
         name='Profile'

@@ -14,10 +14,15 @@ import {
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
+import { Linking } from 'react-native';
 
 export default function MyAccountScreen({ navigation }) {
   const isFocused = useIsFocused();
-
+  const getLink = async () => {
+    const link = await Linking.getInitialURL()
+    console.log('link: ', link);
+  }
+  getLink()
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const authCtx = useContext(AuthConText);
   const token = authCtx.accessToken;
@@ -150,6 +155,41 @@ export default function MyAccountScreen({ navigation }) {
 
                   <Text style={styles.rowValue}>English</Text>
                 
+                </TouchableOpacity>
+              </View>
+
+
+              <View>
+                <Text style={styles.profileName}>{username}</Text>
+
+                <Text style={styles.profileAddress}>
+                  {role}
+                </Text>
+              </View>
+            </View>
+
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Preferences</Text>
+
+            <View style={styles.sectionBody}>
+              <View style={[styles.rowWrapper, styles.rowFirst]}>
+                <TouchableOpacity
+                  onPress={() => {
+                    // handle onPress
+                  }}
+                  style={styles.row}>
+
+                  <Text style={styles.rowLabel}>Language</Text>
+
+                  <View style={styles.rowSpacer} />
+
+                  <Text style={styles.rowValue}>English</Text>
+                  {/* <FeatherIcon
+                        color="#bcbcbc"
+                        name="chevron-right"
+                        size={19} /> */}
                 </TouchableOpacity>
               </View>
 

@@ -74,7 +74,6 @@ export default function MyAccountScreen({ navigation }) {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.clear();
       authCtx.logout();
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);

@@ -10,6 +10,7 @@ import LoadingOverlay from '../components/UI/LoadingOverlay';
 import { GlobalStyles } from '../constants/style';
 import useAxiosAuth from '../lib/hooks/useAxiosAuth';
 
+
 export default function ClassesScreen() {
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
@@ -155,6 +156,7 @@ export default function ClassesScreen() {
         <>
             <StatusBar backgroundColor="#000" />
             {isLoading && <LoadingOverlay />}
+
             <FlatList
                 refreshControl={
                     <RefreshControl

@@ -9,6 +9,7 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
+import DateTimePicker from 'react-native-ui-datepicker';
 
 
 export default function FindTutorScreen({ navigation }) {
@@ -144,9 +145,10 @@ export default function FindTutorScreen({ navigation }) {
         getTuitionFees()
     }, [subjectName, lessons, isNormal])
 
-    const handleDateChange = (value, context) => {
+    const handleDateChange = ({ date }) => {
         const currentDate = new Date().getTime()
-        const pickedDate = new Date(value.$d).getTime()
+        const pickedDate = new Date(date.$d).getTime()
+        setDate(date)
         if (currentDate > pickedDate) {
             alert('You cannot choose a past date');
             setDate(dayjs(new Date().setDate(new Date().getDate() + 1)))
@@ -352,22 +354,27 @@ export default function FindTutorScreen({ navigation }) {
                     </View>
 
                     <Text style={styles.label}>Expected date of study:</Text>
-                    <View style={{ flexDirection: 'row', paddingLeft: 12, marginTop: 12 }}>
-
+                    <View style={{ paddingLeft: 12, marginTop: 12 }}>
                         <TextInput
                             style={styles.inputDate}
                             editable={false}
                             value={formatDate(date)}
                         />
                         <FontAwesome5 name="calendar-alt" size={24} style={styles.icon} color="black" onPress={showDatePicker} />
-
-                        <DateTimePickerModal
+                        <DateTimePicker
+                            style={styles.datePicker}
+                            mode="single"
+                            date={new Date(date)}
+                            onChange={handleDateChange}
+                            onCancel={hideDatePicker}
+                        />
+                        {/* <DateTimePickerModal
                             isVisible={isDatePickerVisible}
                             mode="date"
                             date={date}
                             onConfirm={handleDateChange}
                             onCancel={hideDatePicker}
-                        />
+                        /> */}
                     </View>
 
                     <View style={styles.buttonContainer}>
@@ -471,4 +478,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 8,
     },
+    datePicker: {
+        flex: 1
+    }
 });

@@ -76,7 +76,7 @@ export default function TutorRequestListScreen() {
 
             Alert.alert('Sent apply successful');
 
-            // setRefresh((prev) => !prev);
+            setRefresh((prev) => !prev);
         } catch (error) {
             console.log(error);
 

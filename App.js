@@ -20,6 +20,7 @@ import HistoryOrderScreen from './screens/HistoryOrderScreen';
 import PricingScreen from './screens/PricingScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
 import OTPScreen from './screens/OTPScreen'
+import LandingScreen from './screens/LandingScreen';
 const Stack = createNativeStackNavigator()
 const Bottoms = createBottomTabNavigator()
 
@@ -123,14 +124,6 @@ const BottomTabs = () => {
         }}
       />
 
-      {/* <Bottoms.Screen
-        name='Profile'
-        component={EditProfileScreen}
-        options={{
-          title: 'Edit Profile',
-          tabBarButton: () => null, 
-        }}
-      /> */}
 
     </Bottoms.Navigator>
   )
@@ -140,6 +133,14 @@ const AuthenticatedStack = () => {
   return (
     <Stack.Navigator>
       {/* bottom tabs */}
+      <Stack.Screen
+        name='Landing'
+        component={LandingScreen}
+        options={{
+          headerShown: false,
+          title: ''
+        }}
+      />
       <Stack.Screen
         name='BottomTabs'
         component={BottomTabs}

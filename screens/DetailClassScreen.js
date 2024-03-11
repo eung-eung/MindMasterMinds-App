@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, ScrollView, StatusBar, TouchableOpacity, Image, StyleSheet } from 'react-native'
+import { View, Text, SafeAreaView, ScrollView, StatusBar, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native'
 import React, { useState, useContext, useEffect } from 'react'
 import { AuthConText } from '../store/auth-context';
 import { axiosAuth } from '../lib/axios';
@@ -17,10 +17,10 @@ export default function DetailClassScreen({ navigation, route }) {
     const [refresh, setRefresh] = useState(false)
     const [content, setContent] = useState()
     const [isOrdered, setIsOrdered] = useState(true)
-    const [loading, setLoading] = useState(true)
-
+    const [loadingContent, setLoadingContent] = useState(true)
     const [isLoadingListTutors, setIsLoadingListTutors] = useState(true)
     const getListTutors = async () => {
+        setLoadingContent(true)
         setIsLoadingListTutors(true)
         const response = await axiosAuth
             .get(`/Order/get-list-tutor-resign-order-by-me?orderId=${classID}&pageNumber=0&pageSize=19`,
@@ -33,9 +33,9 @@ export default function DetailClassScreen({ navigation, route }) {
         const content = await getAContentClassByStudent()
         content.statusOrder === 'Ordered' ? setIsOrdered(true) : setIsOrdered(false)
         setIsLoadingListTutors(false)
-        setLoading(false)
         setListTutors(response.data.data)
         setContent(content)
+        setLoadingContent(false)
     }
 
     const getAContentClassByStudent = async () => {
@@ -52,6 +52,7 @@ export default function DetailClassScreen({ navigation, route }) {
 
     const getAContentClassByTutor = async () => {
         setIsLoadingListTutors(true)
+        setLoadingContent(true)
         const response = await axiosAuth.get(`/Order/get-order-detail-by-tutor?orderId=${classID}`,
             {
                 headers: {
@@ -60,7 +61,7 @@ export default function DetailClassScreen({ navigation, route }) {
             })
         setContent(response.data)
         setIsLoadingListTutors(false)
-        setLoading(false)
+        setLoadingContent(false)
     }
     useEffect(() => {
         if (role === 'Student') {
@@ -86,20 +87,21 @@ export default function DetailClassScreen({ navigation, route }) {
     }
 
     const handleComplete = async (id) => {
+        console.log('zo');
         try {
             const response = await axiosAuth.post('/Order/complete-order', id)
             setRefresh((prev) => !prev)
             console.log('success')
         } catch (error) {
             console.log('error: ', error.response.data.Message);
-            alert('error.response.data.Message')
+            Alert.alert('Complete failed', error.response.data.Message)
         }
 
     }
 
     return (
-        <SafeAreaView style={{backgroundColor: 'white'}}>
-            {loading ?
+        <SafeAreaView style={{ backgroundColor: 'white' }}>
+            {loadingContent ?
                 <SkeletonLoader /> :
                 <ScrollView contentContainerStyle={styles.container}>
                     {
@@ -170,7 +172,7 @@ export default function DetailClassScreen({ navigation, route }) {
                                                     :
                                                     <View style={{ flex: 1, backgroundColor: '#fff' }}>
                                                         {
-                                                            listTutors.map(
+                                                            isOrdered ? listTutors.map(
                                                                 tutor =>
                                                                     <TouchableOpacity
                                                                         key={tutor.id}
@@ -223,7 +225,48 @@ export default function DetailClassScreen({ navigation, route }) {
                                                                             </View>
                                                                         </View>
                                                                     </TouchableOpacity>
-                                                            )
+                                                            ) : <>
+                                                                <TouchableOpacity
+                                                                    key={content.tutor.id}
+                                                                    onPress={() => {
+                                                                        // handle onPress
+                                                                    }}>
+                                                                    <View style={styles.card}>
+                                                                        {content.tutor.avatar ?
+                                                                            <Image
+                                                                                alt=""
+                                                                                resizeMode="cover"
+                                                                                source={{ uri: content.tutor.avatar }}
+                                                                                style={styles.cardImg} />
+                                                                            :
+                                                                            <Image
+                                                                                alt=""
+                                                                                resizeMode="cover"
+                                                                                source={{ uri: 'https://freepngimg.com/thumb/youtube/62644-profile-account-google-icons-computer-user-iconfinder.png' }}
+                                                                                style={styles.cardImg} />
+                                                                        }
+                                                                        <View style={styles.cardBody}>
+                                                                            <Text style={styles.cardTag}> {content.tutor.userRole.roleName}</Text>
+
+                                                                            <Text style={styles.cardTitle}>{content.tutor.firstName + ' ' + content.tutor.lastName}</Text>
+
+                                                                            <View style={styles.cardRow}>
+                                                                                <View style={styles.cardRowItem}>
+
+                                                                                    <View style={{ marginRight: 4 }}>
+                                                                                        <Ionicons name="mail-outline" size={18} color="#939393" />
+
+                                                                                    </View>
+                                                                                    <Text style={styles.cardRowItemText}>{content.tutor.email}</Text>
+
+                                                                                </View>
+
+                                                                            </View>
+                                                                        </View>
+                                                                    </View>
+                                                                </TouchableOpacity>
+                                                                {console.log('content: ', content.tutor)}
+                                                            </>
                                                         }
                                                     </View>
                                             }
@@ -340,10 +383,19 @@ export default function DetailClassScreen({ navigation, route }) {
                                         {
                                             content?.statusOrder === 'Confirmed' && role === 'Tutor'
                                             && <TouchableOpacity
-                                                onClick={() => handleComplete(content.id)}
+                                                onPress={() => handleComplete(content.id)}
                                             >
                                                 <View style={styles.btn}>
                                                     <Text style={styles.btnText}>Complete</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        }
+                                        {
+                                            content?.statusOrder === 'Completed' && role === 'Tutor'
+                                            && <TouchableOpacity
+                                            >
+                                                <View style={[styles.btn, { backgroundColor: 'red' }]}>
+                                                    <Text style={{ color: 'white' }}>Completed</Text>
                                                 </View>
                                             </TouchableOpacity>
                                         }
@@ -354,9 +406,9 @@ export default function DetailClassScreen({ navigation, route }) {
 
 
                     </View>
-                </ScrollView>
+                </ScrollView >
             }
-        </SafeAreaView>
+        </SafeAreaView >
 
     )
 }
@@ -420,8 +472,8 @@ const styles = StyleSheet.create({
         marginBottom: 11,
     },
     cardRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
         marginHorizontal: -8,
         marginBottom: 'auto',
     },

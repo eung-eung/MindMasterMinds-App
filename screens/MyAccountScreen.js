@@ -32,20 +32,20 @@ export default function MyAccountScreen({ navigation }) {
   const [role, setRole] = useState('')
 
 
- 
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-          const response = await axiosAuth.get(
-            `/User/get-user-detail/${authCtx.id}`
-          );
-          const userData = response.data;
-          setUsername(userData.firstName + ' ' + userData.lastName || '');
-          setEmail(userData.email || '');
-          setAvatar(userData.avatar || null);
-          setRole(userData.userRole.roleName)
-        
+        const response = await axiosAuth.get(
+          `/User/get-user-detail/${authCtx.id}`
+        );
+        const userData = response.data;
+        setUsername(userData.firstName + ' ' + userData.lastName || '');
+        setEmail(userData.email || '');
+        setAvatar(userData.avatar || null);
+        setRole(userData.userRole.roleName)
+
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -181,32 +181,34 @@ export default function MyAccountScreen({ navigation }) {
                     size={19} />
                 </TouchableOpacity>
               </View>
+              {role === 'Student' &&
+                <View style={styles.rowWrapper}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate('HistoryOrder')
+                    }}
+                    style={styles.row}>
+                    <Text style={styles.rowLabel}>History Order</Text>
 
-              <View style={styles.rowWrapper}>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('HistoryOrder')
-                  }}
-                  style={styles.row}>
-                  <Text style={styles.rowLabel}>History Order</Text>
+                    <View style={styles.rowSpacer} />
 
-                  <View style={styles.rowSpacer} />
+                    <FeatherIcon
+                      color="#bcbcbc"
+                      name="chevron-right"
+                      size={19} />
+                  </TouchableOpacity>
+                </View>
+              }
 
-                  <FeatherIcon
-                    color="#bcbcbc"
-                    name="chevron-right"
-                    size={19} />
-                </TouchableOpacity>
-              </View>
               {role === 'Tutor' ? (
                 <View style={styles.rowWrapper}>
                   <TouchableOpacity
                     onPress={() => {
                       // handle onPress
+                      navigation.navigate('Request')
                     }}
                     style={styles.row}>
                     <Text style={styles.rowLabel}>Tutor request list</Text>
-
                     <View style={styles.rowSpacer} />
 
                     <FeatherIcon

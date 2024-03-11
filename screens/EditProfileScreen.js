@@ -6,7 +6,7 @@ import LoadingOverlay from '../components/UI/LoadingOverlay';
 import * as ImagePicker from 'expo-image-picker';
 import { Snackbar } from 'react-native-paper';
 
-export default function EditProfileScreen({ navigation}) {
+export default function EditProfileScreen({ navigation }) {
   const authCtx = useContext(AuthConText);
   const token = authCtx.accessToken;
 
@@ -39,7 +39,7 @@ export default function EditProfileScreen({ navigation}) {
       setEmail(userData.email || '');
       setAvatarURL(userData.avatar || null);
       setBalance(userData.wallet.balance);
-      console.log("authCtx.id",authCtx.id)
+      console.log("authCtx.id", authCtx.id)
       setLoading(false);
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -60,8 +60,8 @@ export default function EditProfileScreen({ navigation}) {
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
-    setAvatar({ uri: result.assets[0].uri });
-    setAvatarURL(null);
+      setAvatar({ uri: result.assets[0].uri });
+      setAvatarURL(null);
     }
   };
 
@@ -72,14 +72,17 @@ export default function EditProfileScreen({ navigation}) {
       setFirstName(value);
     } else if (name === 'lastName') {
       setLastName(value);
-    } else if (name === 'phoneNum') {
-      setPhoneNum(value);
-      if (value && !value.match(/(84|0[3|5|7|8|9])+([0-9]{8})\b/g)) {
-        setPhoneNumError('Phone number must have 10 digits and start with 0.');
-      } else {
-        setPhoneNumError('');
-      }
-    } else if (name === 'email') {
+    }
+    // else if (name === 'phoneNum') {
+    //   setPhoneNum(value);
+    //   if (value && !value.match(/(84|0[3|5|7|8|9])+([0-9]{8})\b/g)) {
+    //     setPhoneNumError('Phone number must have 10 digits and start with 0.');
+    //   } else {
+    //     setPhoneNumError('');
+    //   }
+    // } 
+
+    else if (name === 'email') {
       setEmail(value);
       if (value && !value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         setEmailError('Please enter a valid email.');
@@ -93,10 +96,10 @@ export default function EditProfileScreen({ navigation}) {
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
-  
+
       if (firstName) formData.append('firstName', firstName);
       if (lastName) formData.append('lastName', lastName);
-      if (phoneNum) formData.append('phoneNum', phoneNum);
+      // if (phoneNum) formData.append('phoneNum', phoneNum);
       if (email) formData.append('email', email);
       if (selectedImage) {
         formData.append('avatar', {
@@ -105,14 +108,14 @@ export default function EditProfileScreen({ navigation}) {
           type: 'image/jpg',
         });
       }
-  
+
       const response = await axiosAuth.put('/User/update-profile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (response.status === 200) {
         console.log('Profile updated successfully');
         setSnackbarMessage('Profile updated successfully!');
@@ -127,7 +130,7 @@ export default function EditProfileScreen({ navigation}) {
     <ScrollView style={{ backgroundColor: 'white' }}>
       {isLoading && <LoadingOverlay message='' />}
       <View style={styles.container}>
-     
+
         <View style={styles.avatarContainer}>
           {selectedImage ? (
             <Image key={selectedImage} style={styles.avatar} source={{ uri: selectedImage }} />
@@ -165,23 +168,13 @@ export default function EditProfileScreen({ navigation}) {
         <TextInput
           name="email"
           style={styles.input}
+          editable={false}
           onChangeText={(value) => handleChange('email', value)}
           value={email}
         />
         {emailError && <Text style={{ color: '#ff0000', fontSize: 12, textAlign: 'left', marginTop: 3 }}>{emailError}</Text>
         }
 
-        <Text style={styles.label}>Phone number</Text>
-        <TextInput
-          name="phoneNum"
-          style={styles.input}
-          onChangeText={(value) => handleChange('phoneNum', value)}
-          value={phoneNum}
-          placeholder="Enter phone number"
-          keyboardType="numeric"
-        />
-        {phoneNumError && <Text style={{ color: '#ff0000', fontSize: 12, textAlign: 'left', marginTop: 3 }}>{phoneNumError}</Text>
-        }
         <Text style={styles.label}>Balance: </Text>
         <TextInput
           name="balance"
@@ -196,16 +189,16 @@ export default function EditProfileScreen({ navigation}) {
         </View>
         <View style={styles.containerSnackbar}>
           <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={1000}
-        >
-        {/* Updated profile successfully! */}
-        <Text style={{color: 'white', textAlign: 'center'}}>{snackbarMessage}</Text>
-      </Snackbar>
+            visible={snackbarVisible}
+            onDismiss={() => setSnackbarVisible(false)}
+            duration={1000}
+          >
+            {/* Updated profile successfully! */}
+            <Text style={{ color: 'white', textAlign: 'center' }}>{snackbarMessage}</Text>
+          </Snackbar>
         </View>
       </View>
-      
+
     </ScrollView>
   )
 }
@@ -215,6 +208,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 30,
     marginRight: 30,
+  },
+  changeAvatarButtonText: {
+    marginTop: 10,
+    color: '#007bff'
   },
   label: {
     marginTop: 20,

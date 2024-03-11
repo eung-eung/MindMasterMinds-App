@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, StyleSheet, TextInput, ScrollView, Button, TouchableOpacity, KeyboardAvoidingView } from 'react-native'
+import { View, Text, ActivityIndicator, StyleSheet, TextInput, ScrollView, Button, TouchableOpacity, KeyboardAvoidingView, Alert } from 'react-native'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AuthConText } from '../store/auth-context';
 import { axiosAuth } from '../lib/axios';
@@ -133,8 +133,7 @@ export default function FindTutorScreen({ navigation }) {
                     navigation.navigate('Classes');
 
                 } catch (error) {
-                    console.error('Order submission error:', error);
-                    alert(error.response.data.Message);
+                    Alert.alert(error.response.data.Message);
                 }
             } else {
                 alert('Failed to retrieve courseSubjectId');

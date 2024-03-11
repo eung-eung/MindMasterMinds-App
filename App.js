@@ -21,6 +21,10 @@ import PricingScreen from './screens/PricingScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
 import OTPScreen from './screens/OTPScreen'
 import LandingScreen from './screens/LandingScreen';
+import TutorRequestListScreen from './screens/TutorRequestListScreen';
+import useAxiosAuth from './lib/hooks/useAxiosAuth';
+
+
 const Stack = createNativeStackNavigator()
 const Bottoms = createBottomTabNavigator()
 
@@ -51,37 +55,32 @@ const AuthStack = () => {
     </Stack.Navigator>
   );
 }
-const BottomTabs = () => {
+
+const getUserId = async () => {
   const authCtx = useContext(AuthConText)
+  const axiosAuth = useAxiosAuth()
+  const id = authCtx.id
+  const response = await axiosAuth.get(
+    `/User/get-user-detail/${id}`
+  );
+  const userData = response.data;
+  const role = userData.userRole.roleName
+  return role
+}
+
+const BottomTabs = () => {
+
   return (
     <Bottoms.Navigator
       screenOptions={{
         tabBarActiveTintColor: GlobalStyles.colors.backgroundColorPrimary200,
       }}>
-      <Bottoms.Screen
-        name='Explore'
-        component={ExploreScreen}
-        options={{
-          headerShadowVisible: false,
-          title: 'MindMasterMinds',
-          headerTitleStyle: {
-            color: GlobalStyles.colors.backgroundColorPrimary200,
-            fontWeight: 'bold',
-            fontSize: 25,
 
-          },
-          tabBarLabel: 'Home',
-          tabBarLabelStyle: {
-            fontSize: 13
-          },
-
-          tabBarIcon: ({ size, color }) => <Ionicons name="home" size={size} color={color} />
-        }}
-      />
       <Bottoms.Screen
         name='FindTutor'
         component={FindTutorScreen}
         options={{
+          unmountOnBlur: true,
           title: 'Find Tutor',
           tabBarLabel: 'Find Tutor',
           tabBarLabelStyle: {
@@ -94,6 +93,7 @@ const BottomTabs = () => {
         name='Classes'
         component={ClassesScreen}
         options={{
+          unmountOnBlur: true,
           title: 'Classes',
           tabBarLabel: 'Classes',
           tabBarLabelStyle: {
@@ -102,7 +102,7 @@ const BottomTabs = () => {
           tabBarIcon: ({ size, color }) => <MaterialCommunityIcons name="google-classroom" size={size} color={color} />
         }}
       />
-      <Bottoms.Screen
+      {/* <Bottoms.Screen
         name='ListTutors'
         component={ListTutorsScreen}
         options={{
@@ -113,7 +113,8 @@ const BottomTabs = () => {
           },
           tabBarIcon: ({ size, color }) => <Entypo name="list" size={size} color={color} />
         }}
-      />
+      /> */}
+
       <Bottoms.Screen
         name='MyAccount'
         component={MyAccountScreen}
@@ -156,11 +157,20 @@ const AuthenticatedStack = () => {
           presentation: 'modal'
         }}
       />
+
       <Stack.Screen
         name='Pricing'
         component={PricingScreen}
         options={{
           title: 'Pricing',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name='Request'
+        component={TutorRequestListScreen}
+        options={{
+          title: 'Request',
         }}
       />
       <Stack.Screen
@@ -179,6 +189,7 @@ const AuthenticatedStack = () => {
           presentation: 'modal'
         }}
       />
+
     </Stack.Navigator>
   )
 }

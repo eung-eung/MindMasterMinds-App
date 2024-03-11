@@ -195,20 +195,26 @@ export default function ClassesScreen({ navigation }) {
                     }}
                 />
             </View>
-            <FlatList
-                refreshControl={
-                    <RefreshControl
-                        tintColor={GlobalStyles.colors.backgroundColorPrimary100}
-                        refreshing={false}
-                        onRefresh={refreshHandler}
-                    />}
-                data={listClasses}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-            // ListFooterComponent={renderLoader}
-            // onEndReached={loadMoreItem}
-            // onEndReachedThreshold={0}
-            />
+            {
+                listClasses.length === 0 ? <Text
+                    style={{ marginTop: 100, fontSize: 25, color: '#ccc', fontWeight: 'bold', textAlign: 'center' }}>You don't have any class</Text>
+                    :
+                    <FlatList
+                        refreshControl={
+                            <RefreshControl
+                                tintColor={GlobalStyles.colors.backgroundColorPrimary100}
+                                refreshing={false}
+                                onRefresh={refreshHandler}
+                            />}
+                        data={listClasses}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.id}
+                    // ListFooterComponent={renderLoader}
+                    // onEndReached={loadMoreItem}
+                    // onEndReachedThreshold={0}
+                    />
+            }
+
         </>
     );
 };

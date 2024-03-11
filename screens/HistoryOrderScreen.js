@@ -9,7 +9,7 @@ export default function HistoryOrderScreen() {
     const [isAuthenticating, setIsAuthenticating] = useState(false);
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
-
+    const id = authCtx.id
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDate = new Date(dateString).toLocaleDateString(undefined, options);

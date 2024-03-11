@@ -9,54 +9,51 @@ import moment from 'moment-timezone';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
 import { GlobalStyles } from '../constants/style';
 import useAxiosAuth from '../lib/hooks/useAxiosAuth';
+import { Dropdown } from 'react-native-element-dropdown';
 
-export default function ClassesScreen({navigation}) {
+export default function ClassesScreen({ navigation }) {
     const authCtx = useContext(AuthConText);
     const token = authCtx.accessToken;
+    const id = authCtx.id
     const [isLoading, setIsLoading] = useState(false)
     const [listClasses, setListClasses] = useState([])
     const [isLoadingMore, setIsLoadingMore] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
     const [refreshing, setRefreshing] = useState(false)
+    const [orderStatus, setOrderStatus] = useState('Ordered')
     const [role, setRole] = useState('')
     const axiosAuth = useAxiosAuth()
 
     useEffect(() => {
-        fetchData(0)
-    }, [refreshing])
+        console.log('order status: ', orderStatus);
+        fetchData(0, orderStatus)
+    }, [orderStatus])
 
-    const fetchData = async (page = 0) => {
-        console.log('zo');
+    const fetchData = async (page = 0, orderStatus) => {
+
         try {
-            const storedUserID = await AsyncStorage.getItem('userID');
-            console.log(storedUserID);
-            if (storedUserID) {
+
+            if (id) {
                 const response = await axiosAuth.get(
-                    `/User/get-user-detail/${storedUserID}`
+                    `/User/get-user-detail/${id}`
                 );
                 const userData = response.data;
                 console.log('userdata: ', userData.userRole.roleName);
                 const role = userData.userRole.roleName
                 setRole(role)
                 if (role === 'Tutor') {
-
-                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=${page}&pageSize=5`);
-                    console.log(response.data.data);
-                    if (response.data.data.length === 0) {
-                        setIsLoadingMore(false)
-                    } else {
-                        setIsLoadingMore(true)
-                    }
-                    setListClasses(prev => ([...prev, ...response.data.data]));
+                    console.log('zo');
+                    setIsLoading(true)
+                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-tutor?pageNumber=0&pageSize=100&statusOrder=${orderStatus}`);
+                    setIsLoading(false)
+                    setListClasses(response.data.data);
 
                 } else if (role === 'Student') {
-                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-me?pageNumber=${page}&pageSize=5`);
-                    if (response.data.data.length === 0) {
-                        setIsLoadingMore(false)
-                    } else {
-                        setIsLoadingMore(true)
-                    }
-                    setListClasses(prev => ([...prev, ...response.data.data]));
+                    console.log('vào');
+                    setIsLoading(true)
+                    const response = await axiosAuth.get(`/Order/get-list-order-by-course-and-status-by-me?pageNumber=0&pageSize=100&statusOrder=${orderStatus}`);
+                    setIsLoading(false)
+                    setListClasses(response.data.data);
 
                 }
             }
@@ -73,9 +70,7 @@ export default function ClassesScreen({navigation}) {
                     <View contentContainerStyle={styles.container}>
                         <TouchableOpacity
                             key={item.id}
-                            onPress={() => {
-                                navigation.navigate('DetailClass', { classID: item.id, role: role });
-                            }}>
+                        >
                             <View style={styles.card}>
 
                                 <View style={styles.cardBody}>
@@ -116,14 +111,38 @@ export default function ClassesScreen({navigation}) {
                                                 }
                                             </Text>
                                         </Text>
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                navigation.navigate('DetailClass', { classID: item.id, role: role });
-                                            }}>
-                                            <View style={styles.btn}>
-                                                <Text style={styles.btnText}>Go to course</Text>
-                                            </View>
-                                        </TouchableOpacity>
+                                        {
+                                            item.tutor != null &&
+                                            role === 'Tutor' &&
+                                            item.tutor.id === id &&
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    navigation.navigate('DetailClass', { classID: item.id, role: role });
+                                                }}>
+                                                <View style={styles.btn}>
+                                                    <Text style={styles.btnText}>Go to course</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        }
+                                        {
+                                            item.tutor != null &&
+                                            role === 'Tutor' &&
+                                            item.tutor.id !== id &&
+                                            <TouchableOpacity>
+                                                <View style={[styles.btn, styles.noBackgr]}>
+                                                    <Text style={styles.btnText2}>Eliminated</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        }
+                                        {role === 'Student' &&
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    navigation.navigate('DetailClass', { classID: item.id, role: role });
+                                                }}>
+                                                <View style={styles.btn}>
+                                                    <Text style={styles.btnText}>Go to course</Text>
+                                                </View>
+                                            </TouchableOpacity>}
                                     </View>
                                 </View>
                             </View>
@@ -149,26 +168,46 @@ export default function ClassesScreen({navigation}) {
     const refreshHandler = () => {
         setListClasses([])
         setCurrentPage(0)
-        fetchData(0)
+        fetchData(0, orderStatus)
     }
 
     return (
         <>
             <StatusBar backgroundColor="#000" />
-            {isLoading && <ActivityIndicator />}
+            {isLoading && <LoadingOverlay />}
+            <View style={{ margin: 10, alignItems: 'flex-end' }}>
+                <Dropdown
+                    style={styles.dropdown}
+                    data={[
+                        { label: 'Ordered', value: 'Ordered' },
+                        { label: 'Confirmed', value: 'Confirmed' },
+                        { label: 'Completed', value: 'Completed' },
+                    ]}
+                    value={orderStatus}
+                    placeholder="Select Status"
+                    labelField="label"
+                    valueField="value"
+                    maxHeight={300}
+                    inputSearchStyle={styles.inputSearchStyle}
+                    onChange={item => {
+                        console.log('change: ', item);
+                        setOrderStatus(item.value);
+                    }}
+                />
+            </View>
             <FlatList
                 refreshControl={
                     <RefreshControl
                         tintColor={GlobalStyles.colors.backgroundColorPrimary100}
-                        refreshing={refreshing}
+                        refreshing={false}
                         onRefresh={refreshHandler}
                     />}
                 data={listClasses}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
-                ListFooterComponent={renderLoader}
-                onEndReached={loadMoreItem}
-                onEndReachedThreshold={0}
+            // ListFooterComponent={renderLoader}
+            // onEndReached={loadMoreItem}
+            // onEndReachedThreshold={0}
             />
         </>
     );
@@ -186,6 +225,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         marginHorizontal: 10,
         marginVertical: 4
+    },
+    noBackgr: {
+        backgroundColor: '#fff',
+        borderWidth: 0
+    },
+    btnText2: {
+        color: 'red',
+        fontWeight: 'bold'
     },
     cardBody: {
         flexGrow: 1,
@@ -259,6 +306,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         backgroundColor: '#93FDD3',
         borderColor: '#93FDD3',
+        minWidth: 110
     },
     btnText: {
         fontSize: 13,
@@ -270,5 +318,16 @@ const styles = StyleSheet.create({
     buttonGroup: {
         flexDirection: 'row',
         marginTop: 14
-    }
+    },
+    dropdown: {
+        height: 50,
+        borderColor: 'gray',
+        borderWidth: 0.5,
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        width: '40%',
+        backgroundColor: 'white',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 1, height: 1 }
+    },
 });

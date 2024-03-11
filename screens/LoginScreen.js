@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { AuthConText } from '../store/auth-context'
-import { Alert, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
 import AuthContent from '../components/Auth/AuthContent'
 import LoadingOverlay from '../components/UI/LoadingOverlay'
 import { getUser } from '../util/auth'
@@ -23,15 +23,17 @@ export default function LoginScreen() {
     }
     return (
         <>
-            <View style={styles.outerContainer}>
-                {isAuthenticating && <LoadingOverlay message='' />}
-                <View style={styles.innerContainer}>
-                    <Image style={styles.image} source={require('../assets/images/logo-app.jpg')} />
-                    <Text style={styles.title}>MindMasterMinds</Text>
-                    <AuthContent isLogin onAuthenticate={signInHandler} />
-                </View>
+            <ScrollView style={styles.outerContainer}>
+                <View style={styles.outerContainer}>
+                    {isAuthenticating && <LoadingOverlay message='' />}
+                    <View style={styles.innerContainer}>
+                        <Image style={styles.image} source={require('../assets/images/logo-app.jpg')} />
+                        <Text style={styles.title}>MindMasterMinds</Text>
+                        <AuthContent isLogin onAuthenticate={signInHandler} />
+                    </View>
 
-            </View>
+                </View>
+            </ScrollView>
         </>
     )
 }

@@ -87,15 +87,32 @@ export default function DetailClassScreen({ navigation, route }) {
     }
 
     const handleComplete = async (id) => {
-        console.log('zo');
-        try {
-            const response = await axiosAuth.post('/Order/complete-order', id)
-            setRefresh((prev) => !prev)
-            console.log('success')
-        } catch (error) {
-            console.log('error: ', error.response.data.Message);
-            Alert.alert('Complete failed', error.response.data.Message)
-        }
+        Alert.alert(
+            'Confirmation',
+            'Are you sure you want to proceed?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel', // Optional: You can customize the button style
+                },
+                {
+                    text: 'OK',
+                    onPress: async () => {
+                        // Handle the confirmation logic here
+                        console.log('User confirmed!');
+                        try {
+                            const response = await axiosAuth.post('/Order/complete-order', id)
+                            setRefresh((prev) => !prev)
+                            console.log('success')
+                        } catch (error) {
+                            Alert.alert('Complete failed', error.response.data.Message)
+                        }
+                    },
+                },
+            ],
+            { cancelable: true } // Optional: Allow tapping outside the alert to dismiss
+        );
+
 
     }
 

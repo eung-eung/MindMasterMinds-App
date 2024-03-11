@@ -85,7 +85,7 @@ export default function FindTutorScreen({ navigation }) {
         setFeeNumber(0)
     }, [majorName])
 
-
+    console.log('status: ', isNormal);
     const handleSubmitPost = async () => {
         const order = {};
         if (
@@ -105,6 +105,7 @@ export default function FindTutorScreen({ navigation }) {
                 order.study = date instanceof Date ? date : date.toDate();
                 order.stateInfo = isNormal;
                 order.phone = phoneNumber.trim();
+                console.log('ORDER: ', order);
                 try {
                     const response = await axiosAuth.post('/Order', {
                         summary: order.summary,
@@ -120,6 +121,14 @@ export default function FindTutorScreen({ navigation }) {
                         }
                     });
                     console.log('Order response:', response.data);
+                    setSummaryValue('')
+                    setPhoneNumber('')
+                    setDescriptionValue('')
+                    setMajorList([])
+                    setSubjectList([])
+                    setFeeNumber(0)
+                    setIsNormal(true)
+                    setLessons(1)
                     alert('Posted successfully');
                     navigation.navigate('Classes');
 
@@ -355,22 +364,22 @@ export default function FindTutorScreen({ navigation }) {
 
                     <Text style={styles.label}>Expected date of study:</Text>
                     <View style={{ paddingLeft: 12, marginTop: 12 }}>
-                        <View style={{flexDirection: 'row'}}>
-                        <TextInput
-                            style={styles.inputDate}
-                            editable={false}
-                            value={formatDate(date)}
-                        />
-                        <FontAwesome5 name="calendar-alt" size={24} style={styles.icon} color="black" onPress={showDatePicker} />
+                        <View style={{ flexDirection: 'row' }}>
+                            <TextInput
+                                style={styles.inputDate}
+                                editable={false}
+                                value={formatDate(date)}
+                            />
+                            <FontAwesome5 name="calendar-alt" size={24} style={styles.icon} color="black" onPress={showDatePicker} />
                         </View>
                         {open && (
-                        <DateTimePicker
-                            style={styles.datePicker}
-                            mode="single"
-                            date={new Date(date)}
-                            onChange={handleDateChange}
-                            onCancel={hideDatePicker}
-                        />
+                            <DateTimePicker
+                                style={styles.datePicker}
+                                mode="single"
+                                date={new Date(date)}
+                                onChange={handleDateChange}
+                                onCancel={hideDatePicker}
+                            />
                         )}
                         {/* <DateTimePickerModal
                             isVisible={isDatePickerVisible}

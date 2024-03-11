@@ -23,17 +23,17 @@ export default function LoginScreen() {
     }
     return (
         <>
-            <ScrollView style={styles.outerContainer}>
-                <View style={styles.outerContainer}>
-                    {isAuthenticating && <LoadingOverlay message='' />}
-                    <View style={styles.innerContainer}>
-                        <Image style={styles.image} source={require('../assets/images/logo-app.jpg')} />
-                        <Text style={styles.title}>MindMasterMinds</Text>
-                        <AuthContent isLogin onAuthenticate={signInHandler} />
-                    </View>
 
+            <View style={styles.outerContainer}>
+                {isAuthenticating && <LoadingOverlay message='' />}
+                <View style={styles.innerContainer}>
+                    <Image style={styles.image} source={require('../assets/images/logo-app.jpg')} />
+                    <Text style={styles.title}>MindMasterMinds</Text>
+                    <AuthContent isLogin onAuthenticate={signInHandler} />
                 </View>
-            </ScrollView>
+
+            </View>
+
         </>
     )
 }

@@ -7,7 +7,9 @@ import {
   Image,
   ScrollView,
   Linking,
-  AppState
+  AppState,
+  SafeAreaView,
+  Button
 } from 'react-native';
 import { axiosAuth } from '../lib/axios';
 import useAxiosAuth from '../lib/hooks/useAxiosAuth';
@@ -25,6 +27,7 @@ const packageItem = [
 ];
 
 export default function PricingScreen({ navigation }) {
+
   const [selectedItem, setSelectedItem] = useState(null);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -77,70 +80,77 @@ export default function PricingScreen({ navigation }) {
       subscription.remove();
     };
   }, []);
+
+
+
   return (
     <>
-      {isLoading && <LoadingOverlay />}
-      {show &&
-        <WebView
-          injectedJavaScript={injectedJavascript}
-          startInLoadingState
-          scalesPageToFit
-          style={{ flex: 1 }}
-          source={{ uri: sourceUri }}
-          javaScriptEnabled
-          onMessage={(e) => {
-            nav.replace('BottomTabs')
-          }}
-          onNavigationStateChange={(navState => {
-            console.log('webview navstate: ', navState.vnp_ResponseCode);
-            console.log('native url: ', navState.url);
-            if (navState.url.includes('vnp_ResponseCode')) {
-              // Extract the response code or other relevant information from the URL
-              const urlParams = new URLSearchParams(navState.url);
-              const responseCode = urlParams.get('vnp_ResponseCode');
-              const transactionNo = urlParams.get('vnp_TransactionNo');
-              const paymentStatus = responseCode === '00' ? 'Successful' : 'Failed';
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.backButton}>
+          <Button title='Back' onPress={() => { navigation.navigate('BottomTabs') }} />
+        </View>
+        {isLoading && <LoadingOverlay />}
+        {show &&
+          <WebView
+            injectedJavaScript={injectedJavascript}
+            startInLoadingState
+            scalesPageToFit
+            style={{ flex: 1 }}
+            source={{ uri: sourceUri }}
+            javaScriptEnabled
+            onMessage={(e) => {
+              nav.replace('Pricing')
+            }}
+            onNavigationStateChange={(navState => {
+              console.log('webview navstate: ', navState.vnp_ResponseCode);
+              console.log('native url: ', navState.url);
+              if (navState.url.includes('vnp_ResponseCode')) {
+                // Extract the response code or other relevant information from the URL
+                const urlParams = new URLSearchParams(navState.url);
+                const responseCode = urlParams.get('vnp_ResponseCode');
+                const transactionNo = urlParams.get('vnp_TransactionNo');
+                const paymentStatus = responseCode === '00' ? 'Successful' : 'Failed';
 
-              // Handle the payment status accordingly
-              console.log(`Payment Status: ${paymentStatus}, Transaction No: ${transactionNo}`);
+                // Handle the payment status accordingly
+                console.log(`Payment Status: ${paymentStatus}, Transaction No: ${transactionNo}`);
 
-              // Close the WebView or navigate as needed
-            }
-          })}
-        />
-      }
-      {!show &&
-        <ScrollView style={{ flex: 1, backgroundColor: '#fafafa' }}>
+                // Close the WebView or navigate as needed
+              }
+            })}
+          />
+        }
+        {!show &&
+          <ScrollView style={{ flex: 1, backgroundColor: '#fafafa' }}>
 
-          <View style={styles.container}>
-            <Text style={styles.title}>Pick your plan</Text>
+            <View style={styles.container}>
+              {/* <Text style={styles.title}>Pick your plan</Text> */}
 
-            {packageItem.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={async () => {
-                  setSelectedItem(item);
-                  handlePayment(item.price)
-                }}
-              >
-                <View style={[styles.radio, selectedItem === item && styles.radioActive]}>
-                  <View style={styles.card}>
-                    <View style={styles.content}>
-                      <Text style={styles.radioLabel}>{item.name}</Text>
-                      <Text style={styles.radioPrice}>{item.price.toLocaleString()} VND</Text>
+              {packageItem.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={async () => {
+                    setSelectedItem(item);
+                    handlePayment(item.price)
+                  }}
+                >
+                  <View style={[styles.radio, selectedItem === item && styles.radioActive]}>
+                    <View style={styles.card}>
+                      <View style={styles.content}>
+                        <Text style={styles.radioLabel}>{item.name}</Text>
+                        <Text style={styles.radioPrice}>{item.price.toLocaleString()} VND</Text>
+                      </View>
+                      <Image
+                        source={{ uri: item.image }}
+                        style={styles.radioImage}
+                      />
                     </View>
-                    <Image
-                      source={{ uri: item.image }}
-                      style={styles.radioImage}
-                    />
                   </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
-      }
-
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        }
+      </SafeAreaView>
     </>
   );
 }
@@ -148,6 +158,9 @@ export default function PricingScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     padding: 12,
+  },
+  backButton: {
+    alignItems: 'flex-start'
   },
   title: {
     fontSize: 32,
@@ -203,4 +216,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     marginLeft: 8
   },
+  safe: {
+    flex: 1
+  }
 });

@@ -8,9 +8,7 @@ import {
     Alert,
 } from 'react-native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import { Bounce, ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import FontAwesome from 'react-native-vector-icons/FontAwesome5';
+
 
 import { AuthConText } from '../store/auth-context';
 import { axiosAuth } from '../lib/axios';
@@ -22,6 +20,8 @@ export default function TutorRequestListScreen() {
     const token = authCtx.accessToken;
     const [refresh, setRefresh] = useState(false);
     console.log(token)
+
+
 
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -56,7 +56,7 @@ export default function TutorRequestListScreen() {
             }
         };
         fetchData();
-    }, []);
+    }, [refresh]);
 
     const handleApply = async (id) => {
         try {
